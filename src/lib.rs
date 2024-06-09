@@ -10,22 +10,12 @@ use opaque_ke::{
 };
 
 use base64::{engine::general_purpose as b64, Engine as _};
-use serde::{Deserialize, Serialize};
-use tsify::Tsify;
 use wasm_bindgen::prelude::*;
 
-// #[wasm_bindgen]
-// extern "C" {
-//     fn alert(s: &str);
-//     #[wasm_bindgen(js_namespace = console)]
-//     fn log(s: &str);
-// }
+mod csharp;
+use libc::c_char;
 
-// macro_rules! console_log {
-//     // Note that this is using the `log` function imported above during
-//     // `bare_bones`
-//     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-// }
+mod types;
 
 enum Error {
     Protocol {
@@ -86,8 +76,7 @@ fn base64_decode<T: AsRef<[u8]>>(context: &'static str, input: T) -> JsResult<Ve
     BASE64.decode(input).map_err(from_base64_error(context))
 }
 
-#[wasm_bindgen(js_name = createServerSetup)]
-pub fn create_server_setup() -> String {
+pub fn internal_create_server_setup() -> String {
     let mut rng: OsRng = OsRng;
     let setup = ServerSetup::<DefaultCipherSuite>::new(&mut rng);
     BASE64.encode(setup.serialize())
@@ -100,22 +89,27 @@ fn decode_server_setup(data: String) -> JsResult<ServerSetup<DefaultCipherSuite>
     })
 }
 
-#[wasm_bindgen(js_name = getServerPublicKey)]
-pub fn get_server_public_key(data: String) -> Result<String, JsError> {
+fn internal_get_server_public_key(data: String) -> Result<String, JsError> {
     let server_setup = decode_server_setup(data)?;
     let pub_key = server_setup.keypair().public().serialize();
     Ok(BASE64.encode(pub_key))
 }
 
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-pub struct CustomIdentifiers {
-    #[tsify(optional)]
-    client: Option<String>,
-    #[tsify(optional)]
-    server: Option<String>,
+fn try_create_identifiers(
+    csharp_client: Option<*mut c_char>,
+    csharp_server: Option<*mut c_char>,
+) -> Option<types::CustomIdentifiers> {
+    if csharp_client.is_some() && csharp_server.is_some() {
+        let rust_client: Option<String> = csharp::try_csharp_string_to_rust_string(csharp_client);
+        let rust_server: Option<String> = csharp::try_csharp_string_to_rust_string(csharp_server);
+
+        Some(types::CustomIdentifiers::new(rust_client, rust_server))
+    } else {
+        None
+    }
 }
 
-fn get_identifiers(idents: &Option<CustomIdentifiers>) -> Identifiers {
+fn get_identifiers(idents: &Option<types::CustomIdentifiers>) -> Identifiers {
     Identifiers {
         client: idents
             .as_ref()
@@ -126,28 +120,9 @@ fn get_identifiers(idents: &Option<CustomIdentifiers>) -> Identifiers {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct CreateServerRegistrationResponseParams {
-    #[serde(rename = "serverSetup")]
-    server_setup: String,
-    #[serde(rename = "userIdentifier")]
-    user_identifier: String,
-    #[serde(rename = "registrationRequest")]
-    registration_request: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct CreateServerRegistrationResponseResult {
-    #[serde(rename = "registrationResponse")]
-    registration_response: String,
-}
-
-#[wasm_bindgen(js_name = createServerRegistrationResponse)]
-pub fn create_server_registration_response(
-    params: CreateServerRegistrationResponseParams,
-) -> Result<CreateServerRegistrationResponseResult, JsError> {
+fn internal_create_server_registration_response(
+    params: types::CreateServerRegistrationResponseParams,
+) -> Result<String, JsError> {
     let server_setup = decode_server_setup(params.server_setup)?;
     let registration_request_bytes =
         base64_decode("registrationRequest", params.registration_request)?;
@@ -159,41 +134,12 @@ pub fn create_server_registration_response(
     )
     .map_err(from_protocol_error("start server registration"))?;
     let registration_response_bytes = server_registration_start_result.message.serialize();
-
-    Ok(CreateServerRegistrationResponseResult {
-        registration_response: BASE64.encode(registration_response_bytes),
-    })
+    Ok(BASE64.encode(registration_response_bytes))
 }
 
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct StartServerLoginParams {
-    #[serde(rename = "serverSetup")]
-    server_setup: String,
-    #[serde(rename = "registrationRecord")]
-    #[tsify(type = "string | null | undefined")]
-    registration_record: Option<String>,
-    #[serde(rename = "startLoginRequest")]
-    start_login_request: String,
-    #[serde(rename = "userIdentifier")]
-    user_identifier: String,
-    #[tsify(optional)]
-    identifiers: Option<CustomIdentifiers>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct StartServerLoginResult {
-    #[serde(rename = "serverLoginState")]
-    server_login_state: String,
-    #[serde(rename = "loginResponse")]
-    login_response: String,
-}
-
-#[wasm_bindgen(js_name = startServerLogin)]
-pub fn start_server_login(
-    params: StartServerLoginParams,
-) -> Result<StartServerLoginResult, JsError> {
+fn internal_start_server_login(
+    params: types::StartServerLoginParams,
+) -> Result<types::StartServerLoginResult, JsError> {
     let server_setup = decode_server_setup(params.server_setup)?;
     let registration_record_bytes = match params.registration_record {
         Some(pw) => base64_decode("registrationRecord", pw).map(Some),
@@ -230,33 +176,13 @@ pub fn start_server_login(
     let login_response = BASE64.encode(server_login_start_result.message.serialize());
     let server_login_state = BASE64.encode(server_login_start_result.state.serialize());
 
-    let result = StartServerLoginResult {
+    Ok(types::StartServerLoginResult {
         server_login_state,
         login_response,
-    };
-    Ok(result)
+    })
 }
 
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct FinishServerLoginParams {
-    #[serde(rename = "serverLoginState")]
-    server_login_state: String,
-    #[serde(rename = "finishLoginRequest")]
-    finish_login_request: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct FinishServerLoginResult {
-    #[serde(rename = "sessionKey")]
-    session_key: String,
-}
-
-#[wasm_bindgen(js_name = finishServerLogin)]
-pub fn finish_server_login(
-    params: FinishServerLoginParams,
-) -> Result<FinishServerLoginResult, JsError> {
+fn internal_finish_server_login(params: types::FinishServerLoginParams) -> Result<String, JsError> {
     let credential_finalization_bytes =
         base64_decode("finishLoginRequest", params.finish_login_request)?;
     let state_bytes = base64_decode("serverLoginState", params.server_login_state)?;
@@ -268,71 +194,24 @@ pub fn finish_server_login(
                 .map_err(from_protocol_error("deserialize finishLoginRequest"))?,
         )
         .map_err(from_protocol_error("finish server login"))?;
-    Ok(FinishServerLoginResult {
-        session_key: BASE64.encode(server_login_finish_result.session_key),
+    Ok(BASE64.encode(server_login_finish_result.session_key))
+}
+
+fn internal_start_client_login(password: String) -> Result<types::StartClientLoginResult, JsError> {
+    let mut client_rng = OsRng;
+    let client_login_start_result =
+        ClientLogin::<DefaultCipherSuite>::start(&mut client_rng, password.as_bytes())
+            .map_err(from_protocol_error("start client login"))?;
+
+    Ok(types::StartClientLoginResult {
+        client_login_state: BASE64.encode(client_login_start_result.state.serialize()),
+        start_login_request: BASE64.encode(client_login_start_result.message.serialize()),
     })
 }
 
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct StartClientLoginParams {
-    password: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct StartClientLoginResult {
-    #[serde(rename = "clientLoginState")]
-    client_login_state: String,
-    #[serde(rename = "startLoginRequest")]
-    start_login_request: String,
-}
-
-#[wasm_bindgen(js_name = startClientLogin)]
-pub fn start_client_login(
-    params: StartClientLoginParams,
-) -> Result<StartClientLoginResult, JsError> {
-    let mut client_rng = OsRng;
-    let client_login_start_result =
-        ClientLogin::<DefaultCipherSuite>::start(&mut client_rng, params.password.as_bytes())
-            .map_err(from_protocol_error("start client login"))?;
-
-    let result = StartClientLoginResult {
-        client_login_state: BASE64.encode(client_login_start_result.state.serialize()),
-        start_login_request: BASE64.encode(client_login_start_result.message.serialize()),
-    };
-    Ok(result)
-}
-
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct FinishClientLoginParams {
-    #[serde(rename = "clientLoginState")]
-    client_login_state: String,
-    #[serde(rename = "loginResponse")]
-    login_response: String,
-    password: String,
-    #[tsify(optional)]
-    identifiers: Option<CustomIdentifiers>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct FinishClientLoginResult {
-    #[serde(rename = "finishLoginRequest")]
-    finish_login_request: String,
-    #[serde(rename = "sessionKey")]
-    session_key: String,
-    #[serde(rename = "exportKey")]
-    export_key: String,
-    #[serde(rename = "serverStaticPublicKey")]
-    server_static_public_key: String,
-}
-
-#[wasm_bindgen(js_name = finishClientLogin)]
-pub fn finish_client_login(
-    params: FinishClientLoginParams,
-) -> Result<Option<FinishClientLoginResult>, JsError> {
+fn internal_finish_client_login(
+    params: types::FinishClientLoginParams,
+) -> Result<Option<types::FinishClientLoginResult>, JsError> {
     let credential_response_bytes = base64_decode("loginResponse", params.login_response)?;
     let state_bytes = base64_decode("clientLoginState", params.client_login_state)?;
     let state = ClientLogin::<DefaultCipherSuite>::deserialize(&state_bytes)
@@ -354,7 +233,7 @@ pub fn finish_client_login(
     }
     let client_login_finish_result = result.unwrap();
 
-    Ok(Some(FinishClientLoginResult {
+    Ok(Some(types::FinishClientLoginResult {
         finish_login_request: BASE64.encode(client_login_finish_result.message.serialize()),
         session_key: BASE64.encode(client_login_finish_result.session_key),
         export_key: BASE64.encode(client_login_finish_result.export_key),
@@ -362,68 +241,25 @@ pub fn finish_client_login(
     }))
 }
 
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct StartClientRegistrationParams {
+fn internal_start_client_registration(
     password: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct StartClientRegistrationResult {
-    #[serde(rename = "clientRegistrationState")]
-    client_registration_state: String,
-    #[serde(rename = "registrationRequest")]
-    registration_request: String,
-}
-
-#[wasm_bindgen(js_name = startClientRegistration)]
-pub fn start_client_registration(
-    params: StartClientRegistrationParams,
-) -> Result<StartClientRegistrationResult, JsError> {
+) -> Result<types::StartClientRegistrationResult, JsError> {
     let mut client_rng = OsRng;
 
-    let client_registration_start_result = ClientRegistration::<DefaultCipherSuite>::start(
-        &mut client_rng,
-        params.password.as_bytes(),
-    )
-    .map_err(from_protocol_error("start client registration"))?;
+    let client_registration_start_result =
+        ClientRegistration::<DefaultCipherSuite>::start(&mut client_rng, password.as_bytes())
+            .map_err(from_protocol_error("start client registration"))?;
 
-    let result = StartClientRegistrationResult {
+    Ok(types::StartClientRegistrationResult {
         client_registration_state: BASE64
             .encode(client_registration_start_result.state.serialize()),
         registration_request: BASE64.encode(client_registration_start_result.message.serialize()),
-    };
-    Ok(result)
+    })
 }
 
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct FinishClientRegistrationParams {
-    password: String,
-    #[serde(rename = "registrationResponse")]
-    registration_response: String,
-    #[serde(rename = "clientRegistrationState")]
-    client_registration_state: String,
-    #[tsify(optional)]
-    identifiers: Option<CustomIdentifiers>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct FinishClientRegistrationResult {
-    #[serde(rename = "registrationRecord")]
-    registration_record: String,
-    #[serde(rename = "exportKey")]
-    export_key: String,
-    #[serde(rename = "serverStaticPublicKey")]
-    server_static_public_key: String,
-}
-
-#[wasm_bindgen(js_name = finishClientRegistration)]
-pub fn finish_client_registration(
-    params: FinishClientRegistrationParams,
-) -> Result<FinishClientRegistrationResult, JsError> {
+fn internal_finish_client_registration(
+    params: types::FinishClientRegistrationParams,
+) -> Result<types::FinishClientRegistrationResult, JsError> {
     let registration_response_bytes =
         base64_decode("registrationResponse", params.registration_response)?;
     let mut rng: OsRng = OsRng;
@@ -446,11 +282,196 @@ pub fn finish_client_registration(
         .map_err(from_protocol_error("finish client registration"))?;
 
     let registration_record_bytes = client_finish_registration_result.message.serialize();
-    let result = FinishClientRegistrationResult {
+
+    Ok(types::FinishClientRegistrationResult {
         registration_record: BASE64.encode(registration_record_bytes),
         export_key: BASE64.encode(client_finish_registration_result.export_key),
         server_static_public_key: BASE64
             .encode(client_finish_registration_result.server_s_pk.serialize()),
-    };
-    Ok(result)
+    })
+}
+
+#[no_mangle]
+pub fn finish_client_registration(
+    csharp_password: *mut c_char,
+    csharp_registration_response: *mut c_char,
+    csharp_client_registration_state: *mut c_char,
+    csharp_client_identifier: Option<*mut c_char>,
+    csharp_server_identifeir: Option<*mut c_char>,
+) -> *mut types::FinishClientRegistrationResult {
+    let rust_password: String = csharp::csharp_string_to_rust_string(csharp_password);
+    let rust_registration_response: String =
+        csharp::csharp_string_to_rust_string(csharp_registration_response);
+    let rust_client_registration_state: String =
+        csharp::csharp_string_to_rust_string(csharp_client_registration_state);
+    let identifiers: Option<types::CustomIdentifiers> =
+        try_create_identifiers(csharp_client_identifier, csharp_server_identifeir);
+
+    if let Ok(result) = internal_finish_client_registration(types::FinishClientRegistrationParams {
+        password: rust_password,
+        registration_response: rust_registration_response,
+        client_registration_state: rust_client_registration_state,
+        identifiers: identifiers,
+    }) {
+        return Box::into_raw(Box::new(result));
+    }
+
+    Box::into_raw(Box::new(types::FinishClientRegistrationResult {
+        registration_record: "".to_string(),
+        export_key: "".to_string(),
+        server_static_public_key: "".to_string(),
+    }))
+}
+
+#[no_mangle]
+pub fn create_server_setup() -> *mut c_char {
+    csharp::rust_string_to_csharp_string_handle(internal_create_server_setup())
+}
+
+#[no_mangle]
+pub fn get_server_public_key(data: *mut c_char) -> *mut c_char {
+    let secret: String = csharp::csharp_string_to_rust_string(data);
+    if let Ok(public_key) = internal_get_server_public_key(secret) {
+        return csharp::rust_string_to_csharp_string_handle(public_key);
+    }
+
+    return csharp::rust_string_to_csharp_string_handle("".to_string());
+}
+
+#[no_mangle]
+pub fn create_server_registration_response(
+    csharp_server_setup: *mut c_char,
+    csharp_user_identifier: *mut c_char,
+    csharp_registration_request: *mut c_char,
+) -> *mut c_char {
+    let rust_server_setup: String = csharp::csharp_string_to_rust_string(csharp_server_setup);
+    let rust_user_identifier: String = csharp::csharp_string_to_rust_string(csharp_user_identifier);
+    let rust_registration_request: String =
+        csharp::csharp_string_to_rust_string(csharp_registration_request);
+
+    if let Ok(result) = internal_create_server_registration_response(
+        types::CreateServerRegistrationResponseParams {
+            server_setup: rust_server_setup,
+            user_identifier: rust_user_identifier,
+            registration_request: rust_registration_request,
+        },
+    ) {
+        return csharp::rust_string_to_csharp_string_handle(result);
+    }
+
+    csharp::rust_string_to_csharp_string_handle("".to_string())
+}
+
+#[no_mangle]
+pub fn start_server_login(
+    csharp_server_setup: *mut c_char,
+    csharp_start_login_request: *mut c_char,
+    csharp_user_identifier: *mut c_char,
+    csharp_registration_record: Option<*mut c_char>,
+    csharp_client_identifier: Option<*mut c_char>,
+    csharp_server_identifier: Option<*mut c_char>,
+) -> *mut types::StartServerLoginResult {
+    let rust_server_setup: String = csharp::csharp_string_to_rust_string(csharp_server_setup);
+    let rust_start_login_request: String =
+        csharp::csharp_string_to_rust_string(csharp_start_login_request);
+    let rust_user_identifier: String = csharp::csharp_string_to_rust_string(csharp_user_identifier);
+    let rust_registration_record: Option<String> =
+        csharp::try_csharp_string_to_rust_string(csharp_registration_record);
+    let identifiers: Option<types::CustomIdentifiers> =
+        try_create_identifiers(csharp_client_identifier, csharp_server_identifier);
+
+    if let Ok(result) = internal_start_server_login(types::StartServerLoginParams {
+        server_setup: rust_server_setup,
+        registration_record: rust_registration_record,
+        start_login_request: rust_start_login_request,
+        user_identifier: rust_user_identifier,
+        identifiers: identifiers,
+    }) {
+        return Box::into_raw(Box::new(result));
+    }
+
+    Box::into_raw(Box::new(types::StartServerLoginResult {
+        server_login_state: "".to_string(),
+        login_response: "".to_string(),
+    }))
+}
+
+#[no_mangle]
+pub fn finish_server_login(
+    csharp_server_login_state: *mut c_char,
+    csharp_finish_login_request: *mut c_char,
+) -> *mut c_char {
+    let rust_server_login_state: String =
+        csharp::csharp_string_to_rust_string(csharp_server_login_state);
+    let rust_finish_login_request: String =
+        csharp::csharp_string_to_rust_string(csharp_finish_login_request);
+
+    if let Ok(result) = internal_finish_server_login(types::FinishServerLoginParams {
+        server_login_state: rust_server_login_state,
+        finish_login_request: rust_finish_login_request,
+    }) {
+        return csharp::rust_string_to_csharp_string_handle(result);
+    }
+
+    return csharp::rust_string_to_csharp_string_handle("".to_string());
+}
+
+#[no_mangle]
+pub fn start_client_login(csharp_password: *mut c_char) -> *mut types::StartClientLoginResult {
+    let rust_password: String = csharp::csharp_string_to_rust_string(csharp_password);
+    if let Ok(result) = internal_start_client_login(rust_password) {
+        return Box::into_raw(Box::new(result));
+    }
+
+    Box::into_raw(Box::new(types::StartClientLoginResult {
+        client_login_state: "".to_string(),
+        start_login_request: "".to_string(),
+    }))
+}
+
+#[no_mangle]
+pub fn finish_client_login(
+    csharp_client_login_state: *mut c_char,
+    csharp_login_response: *mut c_char,
+    csharp_password: *mut c_char,
+    csharp_client_identifier: Option<*mut c_char>,
+    csharp_server_identifeir: Option<*mut c_char>,
+) -> *mut types::FinishClientLoginResult {
+    let rust_client_login_state: String =
+        csharp::csharp_string_to_rust_string(csharp_client_login_state);
+    let rust_login_response: String = csharp::csharp_string_to_rust_string(csharp_login_response);
+    let rust_password: String = csharp::csharp_string_to_rust_string(csharp_password);
+    let identifiers: Option<types::CustomIdentifiers> =
+        try_create_identifiers(csharp_client_identifier, csharp_server_identifeir);
+
+    if let Ok(result) = internal_finish_client_login(types::FinishClientLoginParams {
+        client_login_state: rust_client_login_state,
+        login_response: rust_login_response,
+        password: rust_password,
+        identifiers: identifiers,
+    }) {
+        return Box::into_raw(Box::new(result.unwrap()));
+    }
+
+    Box::into_raw(Box::new(types::FinishClientLoginResult {
+        finish_login_request: "".to_string(),
+        session_key: "".to_string(),
+        export_key: "".to_string(),
+        server_static_public_key: "".to_string(),
+    }))
+}
+
+#[no_mangle]
+pub fn start_client_registration(
+    csharp_password: *mut c_char,
+) -> *mut types::StartClientRegistrationResult {
+    let rust_password: String = csharp::csharp_string_to_rust_string(csharp_password);
+    if let Ok(result) = internal_start_client_registration(rust_password) {
+        return Box::into_raw(Box::new(result));
+    }
+
+    Box::into_raw(Box::new(types::StartClientRegistrationResult {
+        client_registration_state: "".to_string(),
+        registration_request: "".to_string(),
+    }))
 }

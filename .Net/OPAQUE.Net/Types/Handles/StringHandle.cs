@@ -7,14 +7,9 @@ namespace OPAQUE.Net.Types.Handles
     {
         public StringHandle() : base() { }
 
-        protected override bool ReleaseHandle()
+        protected override void DoRelease()
         {
-            if (!IsInvalid)
-            {
-                free_string(handle);
-            }
-
-            return true;
+            free_string(handle);
         }
 
         protected override string GetValue()

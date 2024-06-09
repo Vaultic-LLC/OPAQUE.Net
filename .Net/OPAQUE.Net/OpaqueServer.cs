@@ -1,5 +1,5 @@
-﻿using OPAQUE.Net.Types;
-using OPAQUE.Net.Types.Handles;
+﻿using OPAQUE.Net.Types.Handles;
+using OPAQUE.Net.Types.Results;
 using System.Runtime.InteropServices;
 
 namespace OPAQUE.Net
@@ -8,32 +8,35 @@ namespace OPAQUE.Net
     {
         public OpaqueServer() { }
 
-        public string? SetupServer()
+        public bool SetupServer(out string? result)
         {
-            using StringHandle handle = create_server_setup();
-            return handle.Value;
+            result = create_server_setup().GetAndRelease();
+            return !string.IsNullOrEmpty(result);
         }
 
-        public string? GetPublicKey(string secret)
+        public bool GetPublicKey(string secret, out string? result)
         {
-            using StringHandle handle = get_server_public_key(secret);
-            return handle.Value;
+            result = get_server_public_key(secret).GetAndRelease();
+            return !string.IsNullOrEmpty(result);
         }
 
-        public string? CreateRegistrationResponse(string serverSetup, string userIdentifier, string registrationRequeset)
+        public bool CreateRegistrationResponse(string serverSetup, string userIdentifier, string registrationRequeset, out string? result)
         {
-            using StringHandle handle = create_server_registration_response(serverSetup, userIdentifier, registrationRequeset);
-            return handle.Value;
+            result = create_server_registration_response(serverSetup, userIdentifier, registrationRequeset).GetAndRelease();
+            return !string.IsNullOrEmpty(result);
         }
 
-        public object StartServerLogin()
+        public bool StartLogin(string serverSetup, string startLoginRequest, string userIdentifier, 
+            string? registrationRecord, string? clientIdentitiy, string? serverIdentity, out StartServerLoginResult? result)
         {
-            return start_server_login(args);
+            result = start_server_login(serverSetup, startLoginRequest, userIdentifier, registrationRecord, clientIdentitiy, serverIdentity).GetAndRelease();
+            return result != null;
         }
 
-        public object FinishServerLogin(FinishServerLoginParams args)
+        public bool FinishLogin(string serverLoginState, string finishLoginRequest, out string? result)
         {
-            return finish_server_login(args);
+            result = finish_server_login(serverLoginState, finishLoginRequest).GetAndRelease();
+            return !string.IsNullOrEmpty(result);
         }
 
         [DllImport("opaque.dll")]
@@ -46,9 +49,10 @@ namespace OPAQUE.Net
         private static extern StringHandle create_server_registration_response(string serverSetup, string userIdentifier, string registrationRequest);
 
         [DllImport("opaque.dll")]
-        private static extern object start_server_login(StartServerLoginParams args);
+        private static extern StartServerLoginResultHandle start_server_login(string serverSetup, string startLoginRequest, 
+            string userIdentifier, string? registrationRecord, string? clientIdentitiy, string? serverIdentity);
 
         [DllImport("opaque.dll")]
-        private static extern object finish_server_login(FinishServerLoginParams args);
+        private static extern StringHandle finish_server_login(string serverLoginState, string finishLoginRequest);
     }
 }

@@ -6,26 +6,27 @@ namespace OPAQUE.Net.Types.Handles
     {
         public override bool IsInvalid => this.handle == IntPtr.Zero;
 
-        private T? _value;
-        public T? Value
-        {
-            get => CheckGet();
-            private set => _value = value;
-        }
-
         protected BaseHandle() : base(IntPtr.Zero, true) { }
 
-        private T CheckGet()
+        public T? GetAndRelease()
         {
-            if (_value != null)
-            {
-                return _value;
-            }
+            T? value = GetValue();
+            Dispose();
 
-            _value = GetValue();
-            return _value;
+            return value;
         }
 
-        abstract protected T GetValue();
+        protected override bool ReleaseHandle()
+        {
+            if (!IsInvalid)
+            {
+                DoRelease();
+            }
+
+            return true;
+        }
+
+        abstract protected void DoRelease();
+        abstract protected T? GetValue();
     }
 }

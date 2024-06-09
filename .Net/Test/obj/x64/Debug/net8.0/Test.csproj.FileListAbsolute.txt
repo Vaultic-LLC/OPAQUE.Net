@@ -4,7 +4,6 @@ C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\bin\x64\Debug\net8.0\testhost.e
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\bin\x64\Debug\net8.0\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\bin\x64\Debug\net8.0\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\bin\x64\Debug\net8.0\Microsoft.TestPlatform.AdapterUtilities.dll
-C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\bin\x64\Debug\net8.0\opaque.dll
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\bin\x64\Debug\net8.0\Test.deps.json
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\bin\x64\Debug\net8.0\Test.runtimeconfig.json
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\bin\x64\Debug\net8.0\Test.dll
@@ -114,3 +113,4 @@ C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\obj\x64\Debug\net8.0\refint\Tes
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\obj\x64\Debug\net8.0\Test.pdb
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\obj\x64\Debug\net8.0\Test.genruntimeconfig.cache
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\obj\x64\Debug\net8.0\ref\Test.dll
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\Test\bin\x64\Debug\net8.0\opaque.dll

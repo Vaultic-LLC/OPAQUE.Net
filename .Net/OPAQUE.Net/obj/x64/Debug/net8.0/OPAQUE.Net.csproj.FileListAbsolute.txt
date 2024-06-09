@@ -1,4 +1,3 @@
-C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\bin\x64\Debug\net8.0\opaque.dll
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\bin\x64\Debug\net8.0\OPAQUE.Net.deps.json
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\bin\x64\Debug\net8.0\OPAQUE.Net.dll
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\bin\x64\Debug\net8.0\OPAQUE.Net.pdb
@@ -11,3 +10,4 @@ C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\x64\Debug\net8.0\OPAQ
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\x64\Debug\net8.0\refint\OPAQUE.Net.dll
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\x64\Debug\net8.0\OPAQUE.Net.pdb
 C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\x64\Debug\net8.0\ref\OPAQUE.Net.dll
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\bin\x64\Debug\net8.0\opaque.dll

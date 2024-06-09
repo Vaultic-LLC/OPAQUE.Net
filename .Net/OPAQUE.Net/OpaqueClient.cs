@@ -1,4 +1,5 @@
-﻿using OPAQUE.Net.Types;
+﻿using OPAQUE.Net.Types.Handles;
+using OPAQUE.Net.Types.Results;
 using System.Runtime.InteropServices;
 
 namespace OPAQUE.Net
@@ -7,33 +8,44 @@ namespace OPAQUE.Net
     {
         public OpaqueClient() { }
 
-        public object StartClientRegistration(StartClientRegistrationParams args)
+        public bool StartRegistration(string password, out StartClientRegistrationResult? result)
         {
-            return start_client_registration(args);
+            result = start_client_registration(password)?.GetAndRelease();
+            return result != null;
         }
 
-        public object FinishClientRegistration(FinishClientRegistrationParams args)
+        public bool FinishRegistration(string password, string registrationResponse, string clientRegistrationState, 
+            string? clientIdentifier, string? serverIdentifier, out FinishClientRegistrationResult? result)
         {
-            return finish_client_registration(args);
+            result = finish_client_registration(password, registrationResponse, clientRegistrationState, clientIdentifier, serverIdentifier).GetAndRelease();
+            return result != null;
         }
 
-        public object StartClientLogin(StartClientLoginParams args)
+        public bool StartLogin(string password, out StartClientLoginResult? result)
         {
-            return start_client_login(args);
+            result = start_client_login(password).GetAndRelease();
+            return result != null;
         }
 
-        public object FinishClientLogin(FinishClientLoginParams args)
+        public bool FinishLogin(string clientLoginState, string loginResponse, string password, string? clientIdentifier, 
+            string? serverIdentifier, out FinishClientLoginResult? result)
         {
-            return finish_client_login(args);
+            result = finish_client_login(clientLoginState, loginResponse, password, clientIdentifier, serverIdentifier)?.GetAndRelease();
+            return result != null;
         }
 
         [DllImport("opaque.dll")]
-        private static extern object start_client_registration(StartClientRegistrationParams args);
+        private static extern StartClientRegistrationResultHandle? start_client_registration(string password);
+
         [DllImport("opaque.dll")]
-        private static extern object finish_client_registration(FinishClientRegistrationParams args);
+        private static extern FinishClientRegistrationResultHandle finish_client_registration(string password, string registrationResponse, 
+            string clientRegistrationState, string? clientIdentifier, string? serverIdentifier);
+
         [DllImport("opaque.dll")]
-        private static extern object start_client_login(StartClientLoginParams args);
+        private static extern StartClientLoginResultHandle start_client_login(string password);
+
         [DllImport("opaque.dll")]
-        private static extern object finish_client_login(FinishClientLoginParams args);
+        private static extern FinishClientLoginResultHandler? finish_client_login(string clientLoginState, string loginResponse, string password, 
+            string? clientIdentifier, string? serverIdentifier);
     }
 }
