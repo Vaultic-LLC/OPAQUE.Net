@@ -7,5 +7,6 @@ node_modules
 /build/*/**
 !/build/*/package.json
 .env
-.Net/OPAQUE.Net/.vs/*
-.Net/OPAQUE.Net/obj/*
+.Net/OPAQUE.Net/.vs
+.Net/OPAQUE.Net/obj
+.Net/OPAQUE.Net/bin
