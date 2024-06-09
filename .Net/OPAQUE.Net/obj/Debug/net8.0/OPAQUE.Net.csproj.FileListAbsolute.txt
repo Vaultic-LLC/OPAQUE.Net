@@ -1,0 +1,13 @@
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\bin\Debug\net8.0\opaque.dll
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\bin\Debug\net8.0\OPAQUE.Net.deps.json
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\bin\Debug\net8.0\OPAQUE.Net.dll
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\bin\Debug\net8.0\OPAQUE.Net.pdb
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\Debug\net8.0\OPAQUE.Net.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\Debug\net8.0\OPAQUE.Net.AssemblyInfoInputs.cache
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\Debug\net8.0\OPAQUE.Net.AssemblyInfo.cs
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\Debug\net8.0\OPAQUE.Net.csproj.CoreCompileInputs.cache
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\Debug\net8.0\OPAQUE.Net.sourcelink.json
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\Debug\net8.0\OPAQUE.Net.dll
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\Debug\net8.0\refint\OPAQUE.Net.dll
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\Debug\net8.0\OPAQUE.Net.pdb
+C:\Users\fuzzy\source\repos\OPAQUE.Net\.Net\OPAQUE.Net\obj\Debug\net8.0\ref\OPAQUE.Net.dll
