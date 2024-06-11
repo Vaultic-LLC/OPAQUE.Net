@@ -11,3 +11,4 @@ node_modules
 .Net/OPAQUE.Net/obj
 .Net/OPAQUE.Net/bin
 bin
+target

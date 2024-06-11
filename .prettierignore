@@ -1,6 +1,0 @@
-target/
-examples/client-simple-webpack/dist/
-examples/server-simple/data.json
-pnpm-lock.yaml
-build/
-.next/
