@@ -96,17 +96,20 @@ fn internal_get_server_public_key(data: String) -> Result<String, JsError> {
 }
 
 fn try_create_identifiers(
-    csharp_client: Option<*mut c_char>,
-    csharp_server: Option<*mut c_char>,
+    csharp_client: *mut c_char,
+    csharp_server: *mut c_char,
 ) -> Option<types::CustomIdentifiers> {
-    if csharp_client.is_some() && csharp_server.is_some() {
-        let rust_client: Option<String> = csharp::try_csharp_string_to_rust_string(csharp_client);
-        let rust_server: Option<String> = csharp::try_csharp_string_to_rust_string(csharp_server);
+    let rust_client: String = csharp::csharp_string_to_rust_string(csharp_client);
+    let rust_server: String = csharp::csharp_string_to_rust_string(csharp_server);
 
-        Some(types::CustomIdentifiers::new(rust_client, rust_server))
-    } else {
-        None
+    if rust_client.is_empty() || rust_server.is_empty() {
+        return None;
     }
+
+    return Some(types::CustomIdentifiers::new(
+        Some(rust_client),
+        Some(rust_server),
+    ));
 }
 
 fn get_identifiers(idents: &Option<types::CustomIdentifiers>) -> Identifiers {
@@ -211,7 +214,7 @@ fn internal_start_client_login(password: String) -> Result<types::StartClientLog
 
 fn internal_finish_client_login(
     params: types::FinishClientLoginParams,
-) -> Result<Option<types::FinishClientLoginResult>, JsError> {
+) -> Result<types::FinishClientLoginResult, JsError> {
     let credential_response_bytes = base64_decode("loginResponse", params.login_response)?;
     let state_bytes = base64_decode("clientLoginState", params.client_login_state)?;
     let state = ClientLogin::<DefaultCipherSuite>::deserialize(&state_bytes)
@@ -229,16 +232,21 @@ fn internal_finish_client_login(
 
     if result.is_err() {
         // Client-detected login failure
-        return Ok(None);
+        return Ok(types::FinishClientLoginResult {
+            finish_login_request: "".to_string(),
+            session_key: "".to_string(),
+            export_key: "".to_string(),
+            server_static_public_key: "".to_string(),
+        });
     }
     let client_login_finish_result = result.unwrap();
 
-    Ok(Some(types::FinishClientLoginResult {
+    Ok(types::FinishClientLoginResult {
         finish_login_request: BASE64.encode(client_login_finish_result.message.serialize()),
         session_key: BASE64.encode(client_login_finish_result.session_key),
         export_key: BASE64.encode(client_login_finish_result.export_key),
         server_static_public_key: BASE64.encode(client_login_finish_result.server_s_pk.serialize()),
-    }))
+    })
 }
 
 fn internal_start_client_registration(
@@ -296,8 +304,8 @@ pub fn finish_client_registration(
     csharp_password: *mut c_char,
     csharp_registration_response: *mut c_char,
     csharp_client_registration_state: *mut c_char,
-    csharp_client_identifier: Option<*mut c_char>,
-    csharp_server_identifeir: Option<*mut c_char>,
+    csharp_client_identifier: *mut c_char,
+    csharp_server_identifeir: *mut c_char,
 ) -> *mut types::FinishClientRegistrationResult {
     let rust_password: String = csharp::csharp_string_to_rust_string(csharp_password);
     let rust_registration_response: String =
@@ -367,16 +375,24 @@ pub fn start_server_login(
     csharp_server_setup: *mut c_char,
     csharp_start_login_request: *mut c_char,
     csharp_user_identifier: *mut c_char,
-    csharp_registration_record: Option<*mut c_char>,
-    csharp_client_identifier: Option<*mut c_char>,
-    csharp_server_identifier: Option<*mut c_char>,
+    csharp_registration_record: *mut c_char,
+    csharp_client_identifier: *mut c_char,
+    csharp_server_identifier: *mut c_char,
 ) -> *mut types::StartServerLoginResult {
     let rust_server_setup: String = csharp::csharp_string_to_rust_string(csharp_server_setup);
     let rust_start_login_request: String =
         csharp::csharp_string_to_rust_string(csharp_start_login_request);
     let rust_user_identifier: String = csharp::csharp_string_to_rust_string(csharp_user_identifier);
+
+    let potentially_empty_registration_record =
+        csharp::csharp_string_to_rust_string(csharp_registration_record);
     let rust_registration_record: Option<String> =
-        csharp::try_csharp_string_to_rust_string(csharp_registration_record);
+        if potentially_empty_registration_record.is_empty() {
+            None
+        } else {
+            Some(potentially_empty_registration_record)
+        };
+
     let identifiers: Option<types::CustomIdentifiers> =
         try_create_identifiers(csharp_client_identifier, csharp_server_identifier);
 
@@ -434,8 +450,8 @@ pub fn finish_client_login(
     csharp_client_login_state: *mut c_char,
     csharp_login_response: *mut c_char,
     csharp_password: *mut c_char,
-    csharp_client_identifier: Option<*mut c_char>,
-    csharp_server_identifeir: Option<*mut c_char>,
+    csharp_client_identifier: *mut c_char,
+    csharp_server_identifeir: *mut c_char,
 ) -> *mut types::FinishClientLoginResult {
     let rust_client_login_state: String =
         csharp::csharp_string_to_rust_string(csharp_client_login_state);
@@ -450,7 +466,7 @@ pub fn finish_client_login(
         password: rust_password,
         identifiers: identifiers,
     }) {
-        return Box::into_raw(Box::new(result.unwrap()));
+        return Box::into_raw(Box::new(result));
     }
 
     Box::into_raw(Box::new(types::FinishClientLoginResult {

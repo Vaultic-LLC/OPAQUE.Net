@@ -17,7 +17,7 @@ namespace OPAQUE.Net
         public bool FinishRegistration(string password, string registrationResponse, string clientRegistrationState, 
             string? clientIdentifier, string? serverIdentifier, out FinishClientRegistrationResult? result)
         {
-            result = finish_client_registration(password, registrationResponse, clientRegistrationState, clientIdentifier, serverIdentifier).GetAndRelease();
+            result = finish_client_registration(password, registrationResponse, clientRegistrationState, clientIdentifier ?? "", serverIdentifier ?? "").GetAndRelease();
             return result != null;
         }
 
@@ -30,7 +30,7 @@ namespace OPAQUE.Net
         public bool FinishLogin(string clientLoginState, string loginResponse, string password, string? clientIdentifier, 
             string? serverIdentifier, out FinishClientLoginResult? result)
         {
-            result = finish_client_login(clientLoginState, loginResponse, password, clientIdentifier, serverIdentifier)?.GetAndRelease();
+            result = finish_client_login(clientLoginState, loginResponse, password, clientIdentifier ?? "", serverIdentifier ?? "")?.GetAndRelease();
             return result != null;
         }
 

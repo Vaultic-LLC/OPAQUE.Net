@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OPAQUE.Net")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b242c928664ea3bdfa8e509b3a8d0ee44feaadc6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d835a4d85ca22bdf6ef8986d8f6dce47c1eb9e5f")]
 [assembly: System.Reflection.AssemblyProductAttribute("OPAQUE.Net")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OPAQUE.Net")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -8,35 +8,35 @@ namespace OPAQUE.Net
     {
         public OpaqueServer() { }
 
-        public bool SetupServer(out string? result)
+        public bool CreateSetup(out string? serverSetup)
         {
-            result = create_server_setup().GetAndRelease();
-            return !string.IsNullOrEmpty(result);
+            serverSetup = create_server_setup().GetAndRelease();
+            return !string.IsNullOrEmpty(serverSetup);
         }
 
-        public bool GetPublicKey(string secret, out string? result)
+        public bool GetPublicKey(string secret, out string? publicKey)
         {
-            result = get_server_public_key(secret).GetAndRelease();
-            return !string.IsNullOrEmpty(result);
+            publicKey = get_server_public_key(secret).GetAndRelease();
+            return !string.IsNullOrEmpty(publicKey);
         }
 
-        public bool CreateRegistrationResponse(string serverSetup, string userIdentifier, string registrationRequeset, out string? result)
+        public bool CreateRegistrationResponse(string serverSetup, string userIdentifier, string registrationRequest, out string? registrationResponse)
         {
-            result = create_server_registration_response(serverSetup, userIdentifier, registrationRequeset).GetAndRelease();
-            return !string.IsNullOrEmpty(result);
+            registrationResponse = create_server_registration_response(serverSetup, userIdentifier, registrationRequest).GetAndRelease();
+            return !string.IsNullOrEmpty(registrationResponse);
         }
 
         public bool StartLogin(string serverSetup, string startLoginRequest, string userIdentifier, 
             string? registrationRecord, string? clientIdentitiy, string? serverIdentity, out StartServerLoginResult? result)
         {
-            result = start_server_login(serverSetup, startLoginRequest, userIdentifier, registrationRecord, clientIdentitiy, serverIdentity).GetAndRelease();
+            result = start_server_login(serverSetup, startLoginRequest, userIdentifier, registrationRecord ?? "", clientIdentitiy ?? "", serverIdentity ?? "").GetAndRelease();
             return result != null;
         }
 
-        public bool FinishLogin(string serverLoginState, string finishLoginRequest, out string? result)
+        public bool FinishLogin(string serverLoginState, string finishLoginRequest, out string? serverSessionKey)
         {
-            result = finish_server_login(serverLoginState, finishLoginRequest).GetAndRelease();
-            return !string.IsNullOrEmpty(result);
+            serverSessionKey = finish_server_login(serverLoginState, finishLoginRequest).GetAndRelease();
+            return !string.IsNullOrEmpty(serverSessionKey);
         }
 
         [DllImport("opaque.dll")]

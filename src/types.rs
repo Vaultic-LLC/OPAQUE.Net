@@ -124,7 +124,7 @@ pub extern "C" fn get_start_client_login_result_request(
 }
 
 #[no_mangle]
-pub extern "C" fn free_start_client_login_result(ptr: *mut StartServerLoginResult) {
+pub extern "C" fn free_start_client_login_result(ptr: *mut StartClientLoginResult) {
     if ptr.is_null() {
         return;
     }
@@ -205,7 +205,7 @@ pub extern "C" fn get_finish_client_login_result_public_key(
 }
 
 #[no_mangle]
-pub extern "C" fn free_finish_client_login_result(ptr: *mut StartServerLoginResult) {
+pub extern "C" fn free_finish_client_login_result(ptr: *mut FinishClientLoginResult) {
     if ptr.is_null() {
         return;
     }
@@ -248,7 +248,7 @@ pub extern "C" fn get_start_client_registration_result_request(
 }
 
 #[no_mangle]
-pub extern "C" fn free_start_client_registration_result(ptr: *mut StartServerLoginResult) {
+pub extern "C" fn free_start_client_registration_result(ptr: *mut StartClientRegistrationResult) {
     if ptr.is_null() {
         return;
     }
@@ -287,7 +287,7 @@ pub extern "C" fn get_finish_client_registration_result_record(
         &mut *ptr
     };
 
-    csharp::rust_string_to_csharp_string_handle(result.export_key.clone())
+    csharp::rust_string_to_csharp_string_handle(result.registration_record.clone())
 }
 
 #[no_mangle]
@@ -299,7 +299,7 @@ pub extern "C" fn get_finish_client_registration_result_export_key(
         &mut *ptr
     };
 
-    csharp::rust_string_to_csharp_string_handle(result.registration_record.clone())
+    csharp::rust_string_to_csharp_string_handle(result.export_key.clone())
 }
 
 #[no_mangle]
@@ -315,7 +315,7 @@ pub extern "C" fn get_finish_client_registration_result_public_key(
 }
 
 #[no_mangle]
-pub extern "C" fn free_finish_client_registration_result(ptr: *mut StartServerLoginResult) {
+pub extern "C" fn free_finish_client_registration_result(ptr: *mut FinishClientRegistrationResult) {
     if ptr.is_null() {
         return;
     }
