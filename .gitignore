@@ -10,5 +10,6 @@ node_modules
 .Net/OPAQUE.Net/.vs
 .Net/OPAQUE.Net/obj
 .Net/OPAQUE.Net/bin
+.Net/Test/obj
 bin
 target

@@ -1,4 +1,5 @@
-﻿using OPAQUE.Net.Types.Exceptions;
+﻿using OPAQUE.Net.Helpers;
+using OPAQUE.Net.Types.Exceptions;
 using OPAQUE.Net.Types.Handles;
 using OPAQUE.Net.Types.Results;
 using System.Runtime.InteropServices;
@@ -9,14 +10,30 @@ namespace OPAQUE.Net
     {
         public OpaqueClient() { }
 
+        /// <summary>
+        /// Starts the registration process
+        /// </summary>
+        /// <param name="password">User's Password</param>
+        /// <param name="result">A <see cref="StartClientRegistrationResult"/> filled with data if successful</param>
+        /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool StartRegistration(string password, out StartClientRegistrationResult? result)
         {
             StringParamIsEmptyException.ThrowIfEmpty(password, nameof(password));
 
-            result = start_client_registration(password)?.GetAndRelease();
+            result = FunctionHelper.TryExecute(() => start_client_registration(password))?.GetAndRelease();
             return result != null;
         }
 
+        /// <summary>
+        /// Finishes the registration process for the client side
+        /// </summary>
+        /// <param name="password">Users's Password</param>
+        /// <param name="registrationResponse">Out parameter from <see cref="OpaqueServer.CreateRegistrationResponse(string, string, string, out string?)"/></param>
+        /// <param name="clientRegistrationState"><see cref="StartClientRegistrationResult.ClientRegistrationState"/> from <see cref="OpaqueClient.StartRegistration(string, out StartClientRegistrationResult?)"/></param>
+        /// <param name="clientIdentifier">Current client identifier</param>
+        /// <param name="serverIdentifier">Current server identifier</param>
+        /// <param name="result">A <see cref="FinishClientRegistrationResult"/> filled with data if successful</param>
+        /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool FinishRegistration(string password, string registrationResponse, string clientRegistrationState, 
             string? clientIdentifier, string? serverIdentifier, out FinishClientRegistrationResult? result)
         {
@@ -24,18 +41,36 @@ namespace OPAQUE.Net
             StringParamIsEmptyException.ThrowIfEmpty(registrationResponse, nameof(registrationResponse));
             StringParamIsEmptyException.ThrowIfEmpty(clientRegistrationState, nameof(clientRegistrationState));
 
-            result = finish_client_registration(password, registrationResponse, clientRegistrationState, clientIdentifier ?? "", serverIdentifier ?? "").GetAndRelease();
+            result = FunctionHelper.TryExecute(() => finish_client_registration(password, registrationResponse, 
+                clientRegistrationState, clientIdentifier ?? "", serverIdentifier ?? ""))?.GetAndRelease();
+
             return result != null;
         }
 
+        /// <summary>
+        /// Starts the login process
+        /// </summary>
+        /// <param name="password">Users's current password</param>
+        /// <param name="result">A <see cref="StartClientLoginResult"/> filled with data if successful</param>
+        /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool StartLogin(string password, out StartClientLoginResult? result)
         {
             StringParamIsEmptyException.ThrowIfEmpty(password, nameof(password));
 
-            result = start_client_login(password).GetAndRelease();
+            result = FunctionHelper.TryExecute(() => start_client_login(password))?.GetAndRelease();
             return result != null;
         }
 
+        /// <summary>
+        /// Finishes the login process for the client
+        /// </summary>
+        /// <param name="clientLoginState"><see cref="StartClientLoginResult.ClientLoginState"/> from <see cref="OpaqueClient.StartLogin(string, out StartClientLoginResult?)"/></param>
+        /// <param name="serverLoginResponse"><see cref="StartServerLoginResult.LoginResponse"/> from <see cref="OpaqueServer.StartLogin(string, string, string, string?, string?, string?, out StartServerLoginResult?)"/></param>
+        /// <param name="password">Users's current password</param>
+        /// <param name="clientIdentifier">Current client identifier</param>
+        /// <param name="serverIdentifier">Current server identifier</param>
+        /// <param name="result">A <see cref="FinishClientLoginResult"/> filled with data if successful</param>
+        /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool FinishLogin(string clientLoginState, string serverLoginResponse, string password, string? clientIdentifier, 
             string? serverIdentifier, out FinishClientLoginResult? result)
         {
@@ -43,7 +78,9 @@ namespace OPAQUE.Net
             StringParamIsEmptyException.ThrowIfEmpty(serverLoginResponse, nameof(serverLoginResponse));
             StringParamIsEmptyException.ThrowIfEmpty(password, nameof(password));
 
-            result = finish_client_login(clientLoginState, serverLoginResponse, password, clientIdentifier ?? "", serverIdentifier ?? "")?.GetAndRelease();
+            result = FunctionHelper.TryExecute(() => finish_client_login(clientLoginState, serverLoginResponse, 
+                password, clientIdentifier ?? "", serverIdentifier ?? ""))?.GetAndRelease();
+
             return result != null;
         }
 
