@@ -14,6 +14,10 @@
       "RelativeMoniker": "D:0:0:{1D10B43F-FAB5-4BE9-92A3-0AF4F4FBEA75}|OPAQUE.Net.csproj|solutionrelative:opaqueserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{1D10B43F-FAB5-4BE9-92A3-0AF4F4FBEA75}|OPAQUE.Net.csproj|c:\\users\\fuzzy\\source\\repos\\opaque.net\\.net\\opaque.net\\types\\exceptions\\stringparamisemptyexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D10B43F-FAB5-4BE9-92A3-0AF4F4FBEA75}|OPAQUE.Net.csproj|solutionrelative:types\\exceptions\\stringparamisemptyexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{1D10B43F-FAB5-4BE9-92A3-0AF4F4FBEA75}|OPAQUE.Net.csproj|c:\\users\\fuzzy\\source\\repos\\opaque.net\\.net\\opaque.net\\types\\results\\startserverloginresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1D10B43F-FAB5-4BE9-92A3-0AF4F4FBEA75}|OPAQUE.Net.csproj|solutionrelative:types\\results\\startserverloginresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -69,8 +73,21 @@
       "DocumentGroups": [
         {
           "DockedHeight": 243,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 6,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "StringParamIsEmptyException.cs",
+              "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Exceptions\\StringParamIsEmptyException.cs",
+              "RelativeDocumentMoniker": "Types\\Exceptions\\StringParamIsEmptyException.cs",
+              "ToolTip": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Exceptions\\StringParamIsEmptyException.cs",
+              "RelativeToolTip": "Types\\Exceptions\\StringParamIsEmptyException.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAAJAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-11T21:07:10.914Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
@@ -79,14 +96,14 @@
               "RelativeDocumentMoniker": "OpaqueClient.cs",
               "ToolTip": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\OpaqueClient.cs",
               "RelativeToolTip": "OpaqueClient.cs",
-              "ViewState": "AQIAAAIAAAAAAAAAAAAjwBEAAAAkAAAA",
+              "ViewState": "AQIAAA8AAAAAAAAAAAAAABoAAAAMAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-07T11:23:29.831Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "StartClientLoginResultHandle.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Handles\\StartClientLoginResultHandle.cs",
               "RelativeDocumentMoniker": "Types\\Handles\\StartClientLoginResultHandle.cs",
@@ -99,7 +116,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "FinishClientLoginResultHandler.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Handles\\FinishClientLoginResultHandler.cs",
               "RelativeDocumentMoniker": "Types\\Handles\\FinishClientLoginResultHandler.cs",
@@ -112,7 +129,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "FinishClientLoginResult.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Results\\FinishClientLoginResult.cs",
               "RelativeDocumentMoniker": "Types\\Results\\FinishClientLoginResult.cs",
@@ -131,7 +148,7 @@
               "RelativeDocumentMoniker": "OpaqueServer.cs",
               "ToolTip": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\OpaqueServer.cs",
               "RelativeToolTip": "OpaqueServer.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABUAAAAAAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAADIAAABlAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-07T11:05:50.2Z",
               "EditorCaption": ""
@@ -144,14 +161,14 @@
               "RelativeDocumentMoniker": "..\\Test\\OpaqueTest.cs",
               "ToolTip": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\Test\\OpaqueTest.cs",
               "RelativeToolTip": "..\\Test\\OpaqueTest.cs",
-              "ViewState": "AQIAACcAAAAAAAAAAAAAAEMAAAANAAAA",
+              "ViewState": "AQIAAMUAAAAAAAAAAAAAwN0AAAABAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-07T11:28:56.293Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "StartServerLoginResultHandle.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Handles\\StartServerLoginResultHandle.cs",
               "RelativeDocumentMoniker": "Types\\Handles\\StartServerLoginResultHandle.cs",
@@ -164,7 +181,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "StartServerLoginResult.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Results\\StartServerLoginResult.cs",
               "RelativeDocumentMoniker": "Types\\Results\\StartServerLoginResult.cs",
@@ -177,7 +194,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "StartClientLoginResult.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Results\\StartClientLoginResult.cs",
               "RelativeDocumentMoniker": "Types\\Results\\StartClientLoginResult.cs",
@@ -190,7 +207,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "FinishClientRegistrationResultHandle.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Handles\\FinishClientRegistrationResultHandle.cs",
               "RelativeDocumentMoniker": "Types\\Handles\\FinishClientRegistrationResultHandle.cs",
@@ -203,7 +220,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "FinishClientRegistrationResult.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Results\\FinishClientRegistrationResult.cs",
               "RelativeDocumentMoniker": "Types\\Results\\FinishClientRegistrationResult.cs",
@@ -216,7 +233,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "StartClientRegistrationResult.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Results\\StartClientRegistrationResult.cs",
               "RelativeDocumentMoniker": "Types\\Results\\StartClientRegistrationResult.cs",
@@ -229,7 +246,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "StartClientRegistrationResultHandle.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Handles\\StartClientRegistrationResultHandle.cs",
               "RelativeDocumentMoniker": "Types\\Handles\\StartClientRegistrationResultHandle.cs",
@@ -242,7 +259,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "BaseHandle.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Handles\\BaseHandle.cs",
               "RelativeDocumentMoniker": "Types\\Handles\\BaseHandle.cs",
@@ -255,7 +272,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "StringHandle.cs",
               "DocumentMoniker": "C:\\Users\\fuzzy\\source\\repos\\OPAQUE.Net\\.Net\\OPAQUE.Net\\Types\\Handles\\StringHandle.cs",
               "RelativeDocumentMoniker": "Types\\Handles\\StringHandle.cs",

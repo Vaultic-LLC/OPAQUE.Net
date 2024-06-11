@@ -16,14 +16,6 @@ pub fn csharp_string_to_rust_string(s: *const c_char) -> String {
     return c_str.to_str().unwrap().to_owned();
 }
 
-pub fn try_csharp_string_to_rust_string(s: Option<*mut c_char>) -> Option<String> {
-    if s.is_some() {
-        return Some(csharp_string_to_rust_string(s.unwrap()));
-    }
-
-    return None;
-}
-
 #[no_mangle]
 pub extern "C" fn free_string(s: *mut c_char) {
     unsafe {

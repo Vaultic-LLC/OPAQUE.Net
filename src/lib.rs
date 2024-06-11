@@ -102,13 +102,25 @@ fn try_create_identifiers(
     let rust_client: String = csharp::csharp_string_to_rust_string(csharp_client);
     let rust_server: String = csharp::csharp_string_to_rust_string(csharp_server);
 
-    if rust_client.is_empty() || rust_server.is_empty() {
+    if rust_client.is_empty() && rust_server.is_empty() {
         return None;
     }
 
+    let optional_rust_client: Option<String> = if rust_client.is_empty() {
+        None
+    } else {
+        Some(rust_client)
+    };
+
+    let optional_rust_server: Option<String> = if rust_server.is_empty() {
+        None
+    } else {
+        Some(rust_server)
+    };
+
     return Some(types::CustomIdentifiers::new(
-        Some(rust_client),
-        Some(rust_server),
+        optional_rust_client,
+        optional_rust_server,
     ));
 }
 

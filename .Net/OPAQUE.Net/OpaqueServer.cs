@@ -1,5 +1,7 @@
-﻿using OPAQUE.Net.Types.Handles;
+﻿using OPAQUE.Net.Types.Exceptions;
+using OPAQUE.Net.Types.Handles;
 using OPAQUE.Net.Types.Results;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
 namespace OPAQUE.Net
@@ -14,14 +16,20 @@ namespace OPAQUE.Net
             return !string.IsNullOrEmpty(serverSetup);
         }
 
-        public bool GetPublicKey(string secret, out string? publicKey)
+        public bool GetPublicKey(string serverSetup, out string? publicKey)
         {
-            publicKey = get_server_public_key(secret).GetAndRelease();
+            StringParamIsEmptyException.ThrowIfEmpty(serverSetup, nameof(serverSetup));
+
+            publicKey = get_server_public_key(serverSetup).GetAndRelease();
             return !string.IsNullOrEmpty(publicKey);
         }
 
         public bool CreateRegistrationResponse(string serverSetup, string userIdentifier, string registrationRequest, out string? registrationResponse)
         {
+            StringParamIsEmptyException.ThrowIfEmpty(serverSetup, nameof(serverSetup));
+            StringParamIsEmptyException.ThrowIfEmpty(userIdentifier, nameof(userIdentifier));
+            StringParamIsEmptyException.ThrowIfEmpty(registrationRequest, nameof(registrationRequest));
+
             registrationResponse = create_server_registration_response(serverSetup, userIdentifier, registrationRequest).GetAndRelease();
             return !string.IsNullOrEmpty(registrationResponse);
         }
@@ -29,12 +37,19 @@ namespace OPAQUE.Net
         public bool StartLogin(string serverSetup, string startLoginRequest, string userIdentifier, 
             string? registrationRecord, string? clientIdentitiy, string? serverIdentity, out StartServerLoginResult? result)
         {
+            StringParamIsEmptyException.ThrowIfEmpty(serverSetup, nameof(serverSetup));
+            StringParamIsEmptyException.ThrowIfEmpty(startLoginRequest, nameof(startLoginRequest));
+            StringParamIsEmptyException.ThrowIfEmpty(userIdentifier, nameof(userIdentifier));
+
             result = start_server_login(serverSetup, startLoginRequest, userIdentifier, registrationRecord ?? "", clientIdentitiy ?? "", serverIdentity ?? "").GetAndRelease();
             return result != null;
         }
 
         public bool FinishLogin(string serverLoginState, string finishLoginRequest, out string? serverSessionKey)
         {
+            StringParamIsEmptyException.ThrowIfEmpty(serverLoginState, nameof(serverLoginState));
+            StringParamIsEmptyException.ThrowIfEmpty(finishLoginRequest, nameof(finishLoginRequest));
+
             serverSessionKey = finish_server_login(serverLoginState, finishLoginRequest).GetAndRelease();
             return !string.IsNullOrEmpty(serverSessionKey);
         }
