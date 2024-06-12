@@ -31,21 +31,9 @@ OpaqueClient client = new OpaqueClient();
 
 ### Server Setup
 
-The server setup is a one-time operation. It is used to generate the server's long-term private key.
+The server setup is a one-time operation. It is used to generate the server's long-term private key. The result is a 171 long string. Only store it in a secure location and make sure you have it available in your application e.g. via an environment variable.
 
-Recommended:
-
-```bash
-npx @serenity-kit/opaque@latest create-server-setup
-```
-
-The result is a 171 long string. Only store it in a secure location and make sure you have it available in your application e.g. via an environment variable.
-
-```ts
-const serverSetup = process.env.OPAQUE_SERVER_SETUP;
-```
-
-For development purposes, you can also generate a server setup on the fly:
+You can generate a new server setup on the fly:
 
 ```cs
 server.CreateSetup(out string? serverSetup);
