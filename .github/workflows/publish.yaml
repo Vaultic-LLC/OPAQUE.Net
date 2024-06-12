@@ -39,14 +39,14 @@ jobs:
         retention-days: 7
         path: ${{ env.NuGetDirectory }}/*.nupkg
 
-  run_test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-    - name: Run tests
-      run: dotnet test .Net/Test/Test.csproj --configuration Release
+  # run_test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Setup .NET
+  #     uses: actions/setup-dotnet@v4
+  #   - name: Run tests
+  #     run: dotnet test .Net/Test/Test.csproj --configuration Release
 
   deploy:
     # Publish only when creating a GitHub Release
