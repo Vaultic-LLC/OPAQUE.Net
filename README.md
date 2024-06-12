@@ -2,18 +2,18 @@
 
 Secure password based client-server authentication without the server ever obtaining knowledge of the password.
 
-A JavaScript implementation of the [OPAQUE protocol](https://datatracker.ietf.org/doc/draft-irtf-cfrg-opaque/) based on [opaque-ke](https://github.com/facebook/opaque-ke).
+A C# implementation of the [OPAQUE protocol](https://datatracker.ietf.org/doc/draft-irtf-cfrg-opaque/) forked from [serenity-key/opaque](https://github.com/serenity-kit/opaque).
 
 ## Benefits
 
 - Never accidentally log passwords
 - Security against pre-computation attacks upon server compromise
 - Foundation for encrypted backups and end-to-end encryption apps
-- Through OTF’s [Red Team Lab](https://www.opentech.fund/labs/red-team-lab/), 7ASecurity conducted a [penetration test and whitebox security review](https://7asecurity.com/reports/pentest-report-opaque.pdf)
+- Original repo had a [penetration test and whitebox security review](https://7asecurity.com/reports/pentest-report-opaque.pdf) done through OTF’s [Red Team Lab](https://www.opentech.fund/labs/red-team-lab/), via 7ASecurity
 
 ## Documentation
 
-In depth documentation can be found at [https://opaque-auth.com/](https://opaque-auth.com/).
+In depth documentation can be found at [https://opaque-auth.com/](https://opaque-auth.com/) (written for the original repo)
 
 ## Install
 
@@ -380,18 +380,3 @@ const { finishLoginRequest, sessionKey } = loginResult;
 The default implementation uses [ristretto255](https://ristretto.group/) for the OPRF and the group mode.
 
 If you would like to use the [P-256](https://docs.rs/p256/latest/p256/) curve instead, you can use the [@serenity-kit/opaque-p256](https://www.npmjs.com/package/@serenity-kit/opaque) package. The API is identical.
-
-### ReactNative
-
-There is also a React Native version of this library available at [https://github.com/serenity-kit/react-native-opaque](https://github.com/serenity-kit/react-native-opaque) as weel as [https://github.com/serenity-kit/react-native-opaque-p256](https://github.com/serenity-kit/react-native-opaque-p256).
-
-## Acknowledgement
-
-This project was supported by the [Netidee funding campaign](https://www.netidee.at/).
-
-<img
-  src="https://user-images.githubusercontent.com/223045/225402556-e9f571f3-79fa-4bca-b017-af57d6afe744.jpg"
-  alt="Netidee logo"
-  width="125"
-  height="38"
-/>
