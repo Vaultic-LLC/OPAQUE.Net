@@ -62,6 +62,20 @@ namespace OPAQUE.Net
         /// <param name="startLoginRequest"><see cref="StartClientLoginResult.StartLoginRequest"/> from <see cref="OpaqueClient.StartLogin(string, out StartClientLoginResult?)"/></param>
         /// <param name="userIdentifier">Current user identifier</param>
         /// <param name="registrationRecord"><see cref="FinishClientRegistrationResult.RegistrationRecord"/> from <see cref="OpaqueClient.FinishRegistration(string, string, string, string?, string?, out FinishClientRegistrationResult?)(string, out StartClientLoginResult?)"/></param>
+        /// <param name="result">A <see cref="StartServerLoginResult"/> filled with data if successful</param>
+        /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
+        public bool StartLogin(string serverSetup, string startLoginRequest, string userIdentifier, string? registrationRecord, out StartServerLoginResult? result)
+        {
+            return StartLogin(serverSetup, startLoginRequest, userIdentifier, registrationRecord, "", "", out result);
+        }
+
+        /// <summary>
+        /// Starts the login process for the server
+        /// </summary>
+        /// <param name="serverSetup">String from <see cref="OpaqueServer.CreateSetup(out string?)"/></param>
+        /// <param name="startLoginRequest"><see cref="StartClientLoginResult.StartLoginRequest"/> from <see cref="OpaqueClient.StartLogin(string, out StartClientLoginResult?)"/></param>
+        /// <param name="userIdentifier">Current user identifier</param>
+        /// <param name="registrationRecord"><see cref="FinishClientRegistrationResult.RegistrationRecord"/> from <see cref="OpaqueClient.FinishRegistration(string, string, string, string?, string?, out FinishClientRegistrationResult?)(string, out StartClientLoginResult?)"/></param>
         /// <param name="clientIdentitiy">Current client identifier</param>
         /// <param name="serverIdentity">Current server identifier</param>
         /// <param name="result">A <see cref="StartServerLoginResult"/> filled with data if successful</param>
