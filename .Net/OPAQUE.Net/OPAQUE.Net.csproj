@@ -5,6 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x64;x86</Platforms>
+	<EnablePackageValidation>true</EnablePackageValidation>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<NoWarn>$(NoWarn);CS1591</NoWarn>
+	<PackageTags>Opaque, library</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
