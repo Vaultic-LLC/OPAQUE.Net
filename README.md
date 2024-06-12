@@ -58,7 +58,9 @@ Keep in mind that changing the serverSetup will invalidate all existing password
 ```cs
 // client
 string password = "sup-krah.42-UOI"; // user password
-if (!client.StartRegistration(password, out StartClientRegistrationResult? startClientRegistrationResult))
+if (!client.StartRegistration(
+    password, 
+    out StartClientRegistrationResult? startClientRegistrationResult))
 {
     // handle failed 
 }
@@ -67,7 +69,11 @@ if (!client.StartRegistration(password, out StartClientRegistrationResult? start
 ```cs
 // server
 string userIdentifier = "20e14cd8-ab09-4f4b-87a8-06d2e2e9ff68"; // userId/email/username
-if (!server.CreateRegistrationResponse(serverSetup, userIdentifier, startClientRegistrationResult.RegistrationRequest, out string? registrationResponse))
+if (!server.CreateRegistrationResponse(
+    serverSetup, 
+    userIdentifier, 
+    startClientRegistrationResult.RegistrationRequest, 
+    out string? registrationResponse))
 {
     // handle failed
 }
@@ -75,7 +81,11 @@ if (!server.CreateRegistrationResponse(serverSetup, userIdentifier, startClientR
 
 ```cs
 // client
-if (!client.FinishRegistration(password, registrationResponse, startClientRegistrationResult.ClientRegistrationState, out FinishClientRegistrationResult? finishClientRegistrationResult))
+if (!client.FinishRegistration(
+    password, 
+    registrationResponse, 
+    startClientRegistrationResult.ClientRegistrationState, 
+    out FinishClientRegistrationResult? finishClientRegistrationResult))
 {
     // handle failed
 }
@@ -87,7 +97,9 @@ if (!client.FinishRegistration(password, registrationResponse, startClientRegist
 ```cs
 // client
 string password = "sup-krah.42-UOI"; // user password
-if (!client.StartLogin(password, out StartClientLoginResult? startClientLoginResult))
+if (!client.StartLogin(
+    password, 
+    out StartClientLoginResult? startClientLoginResult))
 {
     // handle failed
 }
@@ -98,7 +110,12 @@ if (!client.StartLogin(password, out StartClientLoginResult? startClientLoginRes
 string userIdentifier = "20e14cd8-ab09-4f4b-87a8-06d2e2e9ff68"; // userId/email/username
 string registrationRecord; // retrieve original registration record
 
-if (!server.StartLogin(serverSetup, startClientLoginResult.StartLoginRequest, userIdentifier, registrationRecord, out StartServerLoginResult? startServerLoginResult))
+if (!server.StartLogin(
+    serverSetup, 
+    startClientLoginResult.StartLoginRequest, 
+    userIdentifier, 
+    registrationRecord, 
+    out StartServerLoginResult? startServerLoginResult))
 {
     // handle failed
 }
@@ -106,7 +123,11 @@ if (!server.StartLogin(serverSetup, startClientLoginResult.StartLoginRequest, us
 
 ```cs
 // client
-if (!client.FinishLogin(startClientLoginResult.ClientLoginState, startServerLoginResult.LoginResponse, password, out FinishClientLoginResult? finishClientLoginResult))
+if (!client.FinishLogin(
+    startClientLoginResult.ClientLoginState, 
+    startServerLoginResult.LoginResponse, 
+    password, 
+    out FinishClientLoginResult? finishClientLoginResult))
 {
     // handle failed
 }
@@ -115,7 +136,10 @@ if (!client.FinishLogin(startClientLoginResult.ClientLoginState, startServerLogi
 ```cs
 // server
 
-if (!server.FinishLogin(startServerLoginResult.ServerLoginState, finishClientLoginResult.FinishLoginRequest, out string? sessionKey))
+if (!server.FinishLogin(
+    startServerLoginResult.ServerLoginState, 
+    finishClientLoginResult.FinishLoginRequest,
+    out string? sessionKey))
 {
     // handle failed
 }
@@ -133,7 +157,11 @@ After the initial registration flow as well as every login flow, the client has 
 
 ```cs
 // client
-if (!client.FinishRegistration(password, registrationResponse, startClientRegistrationResult.ClientRegistrationState, out FinishClientRegistrationResult? finishClientRegistrationResult))
+if (!client.FinishRegistration(
+    password, 
+    registrationResponse, 
+    startClientRegistrationResult.ClientRegistrationState, 
+    out FinishClientRegistrationResult? finishClientRegistrationResult))
 {
     // handle failed
 }
@@ -145,7 +173,11 @@ finishClientRegistrationResult.ExportKey;
 
 ```cs
 // client
-if (!client.FinishLogin(startClientLoginResult.ClientLoginState, startServerLoginResult.LoginResponse, password, out FinishClientLoginResult? finishClientLoginResult))
+if (!client.FinishLogin(
+    startClientLoginResult.ClientLoginState, 
+    startServerLoginResult.LoginResponse, 
+    password, 
+    out FinishClientLoginResult? finishClientLoginResult))
 {
     // handle failed
 }
@@ -172,7 +204,9 @@ npx @serenity-kit/opaque@latest get-server-public-key "<server setup string>"
 Alternatively the functionality is exposed via
 
 ```cs
-if (!server.GetPublicKey(serverSetupString, out string? publicKey))
+if (!server.GetPublicKey(
+    serverSetupString, 
+    out string? publicKey))
 {
     // handle failed
 }
@@ -184,7 +218,11 @@ Registration
 
 ```cs
 // client
-if (!client.FinishRegistration(password, registrationResponse, startClientRegistrationResult.ClientRegistrationState, out FinishClientRegistrationResult? finishClientRegistrationResult))
+if (!client.FinishRegistration(
+    password, 
+    registrationResponse, 
+    startClientRegistrationResult.ClientRegistrationState, 
+    out FinishClientRegistrationResult? finishClientRegistrationResult))
 {
     // handle failed
 }
@@ -196,7 +234,11 @@ Login
 
 ```cs
 // client
-if (!client.FinishLogin(startClientLoginResult.ClientLoginState, startServerLoginResult.LoginResponse, password, out FinishClientLoginResult? finishClientLoginResult))
+if (!client.FinishLogin(
+    startClientLoginResult.ClientLoginState, 
+    startServerLoginResult.LoginResponse, 
+    password, 
+    out FinishClientLoginResult? finishClientLoginResult))
 {
     // handle failed
 }
@@ -211,9 +253,30 @@ By default the server-side sets a `userIdentifier` during the registration and l
 `client.FinishRegistration`, `server.StartLogin` and `client.FinishLogin` all have overloads that take a optional string value for `clientIdentifier` and `serverIdentifier`.
 
 ```cs
-client.FinishRegistration(password, registrationResponse, clientRegistrationState, clientIdentifier, serverIdentifier, out FinishClientRegistrationResult? result);
-server.StartLogin(serverSetup, startLoginRequest, userIdentifier, registrationRecord, clientIdentitiy, serverIdentity, out StartServerLoginResult? result);
-client.FinishLogin(clientLoginState, serverLoginResponse, password, clientIdentifier, serverIdentifier, out FinishClientLoginResult? result);
+client.FinishRegistration(
+    password, 
+    registrationResponse, 
+    clientRegistrationState, 
+    clientIdentifier, 
+    serverIdentifier, 
+    out FinishClientRegistrationResult? result);
+
+server.StartLogin(
+    serverSetup, 
+    startLoginRequest, 
+    userIdentifier, 
+    registrationRecord, 
+    clientIdentitiy, 
+    serverIdentity, 
+    out StartServerLoginResult? result);
+
+client.FinishLogin(
+    clientLoginState, 
+    serverLoginResponse, 
+    password, 
+    clientIdentifier, 
+    serverIdentifier, 
+    out FinishClientLoginResult? result);
 ```
 
 The identifiers will be public, but cryptographically bound to the registration record.
@@ -224,7 +287,13 @@ Once provided in the `client.FinishRegistration` function call, the identical id
 
 ```cs
 // client
-if (!client.FinishRegistration(password, registrationResponse, startClientRegistrationResult.ClientRegistrationState, "jane@example.com", "mastodon.example.com", out FinishClientRegistrationResult? result))
+if (!client.FinishRegistration(
+    password, 
+    registrationResponse, 
+    startClientRegistrationResult.ClientRegistrationState, 
+    "jane@example.com", 
+    "mastodon.example.com", 
+    out FinishClientRegistrationResult? result))
 {
     // handle failed
 }
@@ -235,7 +304,14 @@ if (!client.FinishRegistration(password, registrationResponse, startClientRegist
 
 ```cs
 // server
-if (!server.StartLogin(serverSetup, startClientLoginResult.StartLoginRequest, userIdentifier, registrationRecord, "jane@example.com", "mastodon.example.com", out StartServerLoginResult? startServerLoginResult))
+if (!server.StartLogin(
+    serverSetup, 
+    startClientLoginResult.StartLoginRequest, 
+    userIdentifier, 
+    registrationRecord, 
+    "jane@example.com", 
+    "mastodon.example.com", 
+    out StartServerLoginResult? startServerLoginResult))
 {
     // handle failed
 }
@@ -243,7 +319,13 @@ if (!server.StartLogin(serverSetup, startClientLoginResult.StartLoginRequest, us
 
 ```cs
 // client
-if (!client.FinishLogin(startClientLoginResult.ClientLoginState, startServerLoginResult.LoginResponse, password, "jane@example.com", "mastodon.example.com", out FinishClientLoginResult? finishClientLoginResult))
+if (!client.FinishLogin(
+    startClientLoginResult.ClientLoginState, 
+    startServerLoginResult.LoginResponse, 
+    password, 
+    "jane@example.com", 
+    "mastodon.example.com", 
+    out FinishClientLoginResult? finishClientLoginResult))
 {
     // handle failed
 }
