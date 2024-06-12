@@ -23,7 +23,7 @@ npm install @serenity-kit/opaque
 
 ### Usage
 
-The client and server operations can be invoked through the `OpaqueServer` and `OpaqueClient` objects like so
+The API is exposed through the `OpaqueServer` and `OpaqueClient` objects.
 ```cs
 OpaqueServer server = new OpaqueServer();
 OpaqueClient client = new OpaqueClient();
