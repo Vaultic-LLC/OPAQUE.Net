@@ -6,6 +6,6 @@ The most resent version of the library is supported.
 
 ## Reporting a Vulnerability
 
-In order to report a vulnerability please reach out to nik@serenity.re.
+If the vulnerability is related to the C# implementation, please create a new issue in this repo.
 
-Unfortunately we don't offer any bug bounty since we are a bootstrapped business.
+Otherwise, if the vulnerability is related to the original repo, please reach out to nik@serenity.re.
