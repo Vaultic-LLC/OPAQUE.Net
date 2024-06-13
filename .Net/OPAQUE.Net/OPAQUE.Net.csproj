@@ -18,7 +18,7 @@
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PlatformTarget>x64</PlatformTarget>
-	<Version>1.0.1</Version>
+	<Version>1.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +34,8 @@
 
   <ItemGroup>
     <None Update="opaque.dll">
+      <Pack>True</Pack>
+      <PackagePath>lib\$(TargetFramework)</PackagePath>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
