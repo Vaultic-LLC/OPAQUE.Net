@@ -15,6 +15,11 @@ A C# implementation of the [OPAQUE protocol](https://datatracker.ietf.org/doc/dr
 
 In depth documentation can be found at [https://opaque-auth.com/](https://opaque-auth.com/) (written for the original repo)
 
+## Requirements
+
+This package will only work when running on the x64 platform. This is due to the rust dll. See [Configuring build platforms](https://learn.microsoft.com/en-us/visualstudio/ide/how-to-configure-projects-to-target-platforms?view=vs-2022) for assistance.
+
+
 ## Install
 
 The package is available via nuget as Vaultic.OPAQUE.Net. You can use the GUI within Visual Studio or run the command from the nuget package manager console to install it
@@ -22,7 +27,6 @@ The package is available via nuget as Vaultic.OPAQUE.Net. You can use the GUI wi
 ```sh
 Install-Package Vaultic.OPAQUE.Net
 ```
-
 ### Usage
 
 The API is exposed through the `OpaqueServer` and `OpaqueClient` objects.

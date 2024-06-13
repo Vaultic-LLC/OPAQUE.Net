@@ -17,6 +17,8 @@
 	<RepositoryUrl>https://github.com/Vaultic-LLC/OPAQUE.Net</RepositoryUrl>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<PlatformTarget>x64</PlatformTarget>
+	<Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
