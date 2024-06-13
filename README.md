@@ -17,8 +17,10 @@ In depth documentation can be found at [https://opaque-auth.com/](https://opaque
 
 ## Install
 
+The package is available via nuget as Vaultic.OPAQUE.Net. You can use the GUI within Visual Studio or run the command from the nuget package manager console to install it
+
 ```sh
-npm install @serenity-kit/opaque
+Install-Package Vaultic.OPAQUE.Net
 ```
 
 ### Usage
@@ -183,13 +185,7 @@ It's recommended to verify the server static public key in the application layer
 
 **Server**
 
-The `ServerStaticPublicKey` can be extracted using the following CLI command:
-
-```sh
-npx @serenity-kit/opaque@latest get-server-public-key "<server setup string>"
-```
-
-Alternatively the functionality is exposed via
+The `ServerStaticPublicKey` can be extracted like so:
 
 ```cs
 if (!server.GetPublicKey(
