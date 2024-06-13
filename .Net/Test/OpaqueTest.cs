@@ -47,7 +47,6 @@ namespace Test
             serverStaticPublicKey = finishRegistrationResult.ServerStaicPublicKey;
         }
 
-
         [TestMethod]
         public void FullRegistrationAndLoginSucceeds()
         {

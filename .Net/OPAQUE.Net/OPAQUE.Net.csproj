@@ -9,6 +9,12 @@
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<NoWarn>$(NoWarn);CS1591</NoWarn>
 	<PackageTags>Opaque, library</PackageTags>
+	<PackageId>Vaultic.OPAQUE.Net</PackageId>
+	<Title>Vaultic.OPAQUE.Net</Title>
+	<Authors>Tyler Wanta</Authors>
+	<Company>Vaultic</Company>
+	<Description>Opaque protocal implementation</Description>
+	<RepositoryUrl>https://github.com/Vaultic-LLC/OPAQUE.Net</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
