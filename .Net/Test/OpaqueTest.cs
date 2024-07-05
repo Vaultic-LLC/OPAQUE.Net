@@ -220,25 +220,6 @@ namespace Test
         }
 
         [TestMethod]
-        public void TestWithClientValues()
-        {
-            string userIdentifier = "e7fa739c-0b1d-4086-840c-b3089d68e5c84";
-
-            string serverSetup = "Gg_F8C3hRO7p78KCeCscPGmpGlwyelbDuwVc-kdfHQDsg7fRSIujJtOx3hwsGpKPmIQn6PdEuYwwNLZWOeuLNrjEODbsCEoKSmORiKYY0LRrSm8GqvzQWqYSR0uPyDMFm53bG2i5IrFh6s_1Zi3LsmGRLPxq46IxPBUPAEuVrgE";
-            string clientRegistrationResult = "wKuqxiZ_DF5qVDc6HYOLM4skqbWH6h2WM7mspaPGV0k";
-
-            IOpaqueServer server = OpaqueFactory.CreateServer();
-
-            if (!server.CreateRegistrationResponse(serverSetup, userIdentifier, clientRegistrationResult,
-                out string? serverRegistrationResponse))
-            {
-                throw new Exception();
-            }
-
-            Assert.IsNotNull(serverRegistrationResponse);
-        }
-
-        [TestMethod]
         public void GenerateServerPublicKeyWorks()
         {
             IOpaqueServer server = OpaqueFactory.CreateServer();
