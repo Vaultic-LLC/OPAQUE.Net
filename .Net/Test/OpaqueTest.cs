@@ -1,6 +1,7 @@
-using OPAQUE.Net;
-using OPAQUE.Net.Types.Exceptions;
-using OPAQUE.Net.Types.Results;
+using OPAQUE.Net.Base.Exceptions;
+using OPAQUE.Net.Base.Results;
+using OPAQUE.Net.Factory;
+using static OPAQUE.Net.Factory.OpaqueFactory;
 
 namespace Test
 {
@@ -15,8 +16,8 @@ namespace Test
             exportKey = "";
             serverStaticPublicKey = "";
 
-            OpaqueServer server = new OpaqueServer();
-            OpaqueClient client = new OpaqueClient();
+            IOpaqueServer server = OpaqueFactory.CreateServer();
+            IOpaqueClient client = OpaqueFactory.CreateClient();
 
             if (!server.CreateSetup(out string? serverSecret))
             {
@@ -54,10 +55,10 @@ namespace Test
             string password = "hunter42";
 
             SetupAndRegister(userIdentifier, password, null, null, out string serverSetup, out string registrationRecord,
-                out string exportKey, out string serverStaticPublicKey);         
+                out string exportKey, out string serverStaticPublicKey);
 
-            OpaqueServer server = new OpaqueServer();
-            OpaqueClient client = new OpaqueClient();
+            IOpaqueServer server = OpaqueFactory.CreateServer();
+            IOpaqueClient client = OpaqueFactory.CreateClient();
 
             if (!client.StartLogin(password, out StartClientLoginResult? clientLoginResult))
             {
@@ -103,8 +104,8 @@ namespace Test
             SetupAndRegister(userIdentifier, rightPassword, null, null, out string serverSetup, 
                 out string registrationRecord, out string exportKey, out string serverStaticPublicKey);
 
-            OpaqueServer server = new OpaqueServer();
-            OpaqueClient client = new OpaqueClient();
+            IOpaqueServer server = OpaqueFactory.CreateServer();
+            IOpaqueClient client = OpaqueFactory.CreateClient();
 
             if (!client.StartLogin(rightPassword, out StartClientLoginResult? clientLoginResult))
             {
@@ -133,8 +134,8 @@ namespace Test
             SetupAndRegister(userIdentifier, password, clientIdentifier, null, out string serverSetup, out string registrationRecord, 
                 out string exportKey, out string serverStaticPublicKey);
 
-            OpaqueServer server = new OpaqueServer();
-            OpaqueClient client = new OpaqueClient();
+            IOpaqueServer server = OpaqueFactory.CreateServer();
+            IOpaqueClient client = OpaqueFactory.CreateClient();
 
             if (!client.StartLogin(password, out StartClientLoginResult? startClientLoginResult))
             {
@@ -163,8 +164,8 @@ namespace Test
             SetupAndRegister(userIdentifier, password, null, serverIdentifier, out string serverSetup, out string registrationRecord, 
                 out string exportKey, out string serverStaticPublicKey);
 
-            OpaqueServer server = new OpaqueServer();
-            OpaqueClient client = new OpaqueClient();
+            IOpaqueServer server = OpaqueFactory.CreateServer();
+            IOpaqueClient client = OpaqueFactory.CreateClient();
 
             if (!client.StartLogin(password, out StartClientLoginResult? startClientLoginResult))
             {
@@ -184,7 +185,7 @@ namespace Test
         [TestMethod]
         public void ClientMethodsThrowsOnInvalidParams()
         {
-            OpaqueClient client = new OpaqueClient();
+            IOpaqueClient client = OpaqueFactory.CreateClient();
 
             Assert.ThrowsException<StringParamIsEmptyException>(() => client.StartRegistration("", out _));
 
@@ -202,7 +203,7 @@ namespace Test
         [TestMethod]
         public void ServerMethodsThrowsOnInvalidParams()
         {
-            OpaqueServer server = new OpaqueServer();
+            IOpaqueServer server = OpaqueFactory.CreateServer();
 
             Assert.ThrowsException<StringParamIsEmptyException>(() => server.GetPublicKey("", out _));
 
@@ -216,6 +217,37 @@ namespace Test
 
             Assert.ThrowsException<StringParamIsEmptyException>(() => server.FinishLogin("", "Value", out _));
             Assert.ThrowsException<StringParamIsEmptyException>(() => server.FinishLogin("Value", "", out _));
+        }
+
+        [TestMethod]
+        public void TestWithClientValues()
+        {
+            string userIdentifier = "e7fa739c-0b1d-4086-840c-b3089d68e5c84";
+
+            string serverSetup = "Gg_F8C3hRO7p78KCeCscPGmpGlwyelbDuwVc-kdfHQDsg7fRSIujJtOx3hwsGpKPmIQn6PdEuYwwNLZWOeuLNrjEODbsCEoKSmORiKYY0LRrSm8GqvzQWqYSR0uPyDMFm53bG2i5IrFh6s_1Zi3LsmGRLPxq46IxPBUPAEuVrgE";
+            string clientRegistrationResult = "wKuqxiZ_DF5qVDc6HYOLM4skqbWH6h2WM7mspaPGV0k";
+
+            IOpaqueServer server = OpaqueFactory.CreateServer();
+
+            if (!server.CreateRegistrationResponse(serverSetup, userIdentifier, clientRegistrationResult,
+                out string? serverRegistrationResponse))
+            {
+                throw new Exception();
+            }
+
+            Assert.IsNotNull(serverRegistrationResponse);
+        }
+
+        [TestMethod]
+        public void GenerateServerPublicKeyWorks()
+        {
+            IOpaqueServer server = OpaqueFactory.CreateServer();
+            if (!server.CreateSetup(out string? serverSetup))
+            {
+                throw new Exception();
+            }
+
+            Assert.IsNotNull(serverSetup);
         }
     }
 }
