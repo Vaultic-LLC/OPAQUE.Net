@@ -19,7 +19,7 @@ namespace Test
             IOpaqueServer server = OpaqueFactory.CreateServer();
             IOpaqueClient client = OpaqueFactory.CreateClient();
 
-            if (!server.CreateSetup(out string? serverSecret))
+            if (!server.CreateSetup(out string? serverSecret, out _))
             {
                 throw new Exception();
             }
@@ -223,7 +223,7 @@ namespace Test
         public void GenerateServerPublicKeyWorks()
         {
             IOpaqueServer server = OpaqueFactory.CreateServer();
-            if (!server.CreateSetup(out string? serverSetup))
+            if (!server.CreateSetup(out string? serverSetup, out _))
             {
                 throw new Exception();
             }

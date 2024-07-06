@@ -1,4 +1,7 @@
-﻿namespace OPAQUE.Net.Factory
+﻿using System.Reflection;
+using System.Runtime.InteropServices;
+
+namespace OPAQUE.Net.Factory
 {
     public static partial class OpaqueFactory
     {
@@ -14,6 +17,8 @@
             }
             else if (OperatingSystem.IsLinux())
             {
+                NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), ImportResolver);
+
                 _clientConstructor = () => new LinuxOpaqueClient();
                 _serverConstructor = () => new LinuxOpaqueServer();
             }
@@ -25,5 +30,16 @@
 
         public static IOpaqueClient CreateClient() => _clientConstructor.Invoke();
         public static IOpaqueServer CreateServer() => _serverConstructor.Invoke();
+
+        private const string linuxOpauqeName = "libopaque.so";
+        private static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+        {
+            if (NativeLibrary.TryLoad(Path.Combine("lib/", linuxOpauqeName), out IntPtr libHandle))
+            {
+                return libHandle;
+            }
+
+            return IntPtr.Zero;
+        }
     }
 }

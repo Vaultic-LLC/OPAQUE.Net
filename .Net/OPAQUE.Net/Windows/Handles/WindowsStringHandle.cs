@@ -10,7 +10,7 @@ namespace OPAQUE.Net.Windows.Handles
             free_string(handle);
         }
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern void free_string(nint handle);
     }
 }

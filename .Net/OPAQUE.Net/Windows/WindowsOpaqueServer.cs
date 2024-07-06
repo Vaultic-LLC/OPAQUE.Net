@@ -34,20 +34,20 @@ namespace OPAQUE.Net.Factory
                 return finish_server_login(serverLoginState, finishLoginRequest);
             }
 
-            [DllImport("opaque.dll")]
+            [DllImport("opaque")]
             private static extern WindowsStringHandle create_server_setup();
 
-            [DllImport("opaque.dll")]
+            [DllImport("opaque")]
             private static extern WindowsStringHandle get_server_public_key(string secret);
 
-            [DllImport("opaque.dll")]
+            [DllImport("opaque")]
             private static extern WindowsStringHandle create_server_registration_response(string serverSetup, string userIdentifier, string registrationRequest);
 
-            [DllImport("opaque.dll")]
+            [DllImport("opaque")]
             private static extern WindowsStartServerLoginResultHandle start_server_login(string serverSetup, string startLoginRequest,
                 string userIdentifier, string? registrationRecord, string? clientIdentitiy, string? serverIdentity);
 
-            [DllImport("opaque.dll")]
+            [DllImport("opaque")]
             private static extern WindowsStringHandle finish_server_login(string serverLoginState, string finishLoginRequest);
         }
     }

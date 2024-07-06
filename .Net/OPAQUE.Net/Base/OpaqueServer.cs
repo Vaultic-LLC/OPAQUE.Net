@@ -14,7 +14,7 @@ namespace OPAQUE.Net.Factory
             /// </summary>
             /// <param name="serverSetup">The server setup</param>
             /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
-            bool CreateSetup(out string? serverSetup);
+            bool CreateSetup(out string? serverSetup, out Exception? e);
             /// <summary>
             /// Gets the public key for a server setup
             /// </summary>
@@ -72,9 +72,9 @@ namespace OPAQUE.Net.Factory
             /// </summary>
             /// <param name="serverSetup">The server setup</param>
             /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
-            public bool CreateSetup(out string? serverSetup)
+            public bool CreateSetup(out string? serverSetup, out Exception? e)
             {
-                serverSetup = FunctionHelper.TryExecute(CreateServerSetup)?.GetAndRelease();
+                serverSetup = FunctionHelper.TryExecute(CreateServerSetup, out e)?.GetAndRelease();
                 return !string.IsNullOrEmpty(serverSetup);
             }
 

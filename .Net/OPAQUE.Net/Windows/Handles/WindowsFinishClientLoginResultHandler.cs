@@ -30,16 +30,16 @@ namespace OPAQUE.Net.Windows.Handles
             return get_finish_client_login_result_public_key(handle);
         }
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern void free_finish_client_login_result(IntPtr handle);
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern WindowsStringHandle get_finish_client_login_result_request(IntPtr handle);
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern WindowsStringHandle get_finish_client_login_result_session_key(IntPtr handle);
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern WindowsStringHandle get_finish_client_login_result_export_key(IntPtr handle);
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern WindowsStringHandle get_finish_client_login_result_public_key(IntPtr handle);
     }
 }

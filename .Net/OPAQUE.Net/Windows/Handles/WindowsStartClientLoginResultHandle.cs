@@ -20,12 +20,12 @@ namespace OPAQUE.Net.Windows.Handles
             return get_start_client_login_result_request(handle);
         }
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern void free_start_client_login_result(IntPtr handle);
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern WindowsStringHandle get_start_client_login_result_state(IntPtr handle);
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern WindowsStringHandle get_start_client_login_result_request(IntPtr handle);
     }
 }
