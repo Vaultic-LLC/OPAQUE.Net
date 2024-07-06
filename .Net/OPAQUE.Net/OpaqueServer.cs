@@ -15,9 +15,9 @@ namespace OPAQUE.Net
         /// </summary>
         /// <param name="serverSetup">The server setup</param>
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
-        public bool CreateSetup(out string? serverSetup, out Exception? e)
+        public bool CreateSetup(out string? serverSetup)
         {
-            serverSetup = FunctionHelper.TryExecute(create_server_setup, out e)?.GetAndRelease();
+            serverSetup = FunctionHelper.TryExecute(create_server_setup)?.GetAndRelease();
             return !string.IsNullOrEmpty(serverSetup);
         }
 
