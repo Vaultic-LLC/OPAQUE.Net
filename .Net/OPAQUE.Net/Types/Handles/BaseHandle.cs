@@ -1,12 +1,12 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace OPAQUE.Net.Base.Handles
+namespace OPAQUE.Net.Types.Handles
 {
     abstract public class BaseHandle<T> : SafeHandle
     {
-        public override bool IsInvalid => handle == nint.Zero;
+        public override bool IsInvalid => this.handle == IntPtr.Zero;
 
-        protected BaseHandle() : base(nint.Zero, true) { }
+        protected BaseHandle() : base(IntPtr.Zero, true) { }
 
         public T? GetAndRelease()
         {

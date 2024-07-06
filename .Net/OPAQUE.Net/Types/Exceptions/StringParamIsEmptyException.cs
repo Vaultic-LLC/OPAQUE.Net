@@ -1,4 +1,4 @@
-﻿namespace OPAQUE.Net.Base.Exceptions
+﻿namespace OPAQUE.Net.Types.Exceptions
 {
     public class StringParamIsEmptyException : Exception
     {

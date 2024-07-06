@@ -1,4 +1,4 @@
-﻿namespace OPAQUE.Net.Base.Helpers
+﻿namespace OPAQUE.Net.Helpers
 {
     public static class FunctionHelper
     {
@@ -8,10 +8,7 @@
             {
                 return action.Invoke();
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            catch { /* Exception occured in rust. */ }
 
             return default;
         }

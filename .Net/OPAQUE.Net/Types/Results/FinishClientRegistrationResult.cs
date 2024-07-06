@@ -1,4 +1,4 @@
-﻿namespace OPAQUE.Net.Base.Results
+﻿namespace OPAQUE.Net.Types.Results
 {
     public class FinishClientRegistrationResult
     {

@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-namespace OPAQUE.Net.Base.Handles
+namespace OPAQUE.Net.Types.Handles
 {
     public class StringHandle : BaseHandle<string>
     {
@@ -9,7 +9,7 @@ namespace OPAQUE.Net.Base.Handles
 
         protected override void DoRelease()
         {
-            FreeString(handle);
+            free_string(handle);
         }
 
         protected override string GetValue()
@@ -26,6 +26,7 @@ namespace OPAQUE.Net.Base.Handles
             return Encoding.UTF8.GetString(buffer);
         }
 
-        protected virtual void FreeString(nint handle) { }
+        [DllImport("opaque.dll")]
+        private static extern void free_string(IntPtr handle);
     }
 }
