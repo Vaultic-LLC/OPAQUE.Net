@@ -15,9 +15,9 @@ namespace OPAQUE.Net
         /// </summary>
         /// <param name="serverSetup">The server setup</param>
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
-        public bool CreateSetup(out string? serverSetup)
+        public bool CreateSetup(out string? serverSetup, out Exception? e)
         {
-            serverSetup = FunctionHelper.TryExecute(create_server_setup)?.GetAndRelease();
+            serverSetup = FunctionHelper.TryExecute(create_server_setup, out e)?.GetAndRelease();
             return !string.IsNullOrEmpty(serverSetup);
         }
 
@@ -109,20 +109,20 @@ namespace OPAQUE.Net
             return !string.IsNullOrEmpty(serverSessionKey);
         }
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StringHandle create_server_setup();
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StringHandle get_server_public_key(string secret);
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StringHandle create_server_registration_response(string serverSetup, string userIdentifier, string registrationRequest);
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StartServerLoginResultHandle start_server_login(string serverSetup, string startLoginRequest, 
             string userIdentifier, string? registrationRecord, string? clientIdentitiy, string? serverIdentity);
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StringHandle finish_server_login(string serverLoginState, string finishLoginRequest);
     }
 }

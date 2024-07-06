@@ -24,14 +24,14 @@ namespace OPAQUE.Net.Types.Handles
             return null;
         }
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern void free_finish_client_registration_result(IntPtr handle);
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StringHandle get_finish_client_registration_result_record(IntPtr handle);
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StringHandle get_finish_client_registration_result_export_key(IntPtr handle);
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StringHandle get_finish_client_registration_result_public_key(IntPtr handle);
     }
 }

@@ -26,7 +26,7 @@ namespace OPAQUE.Net.Types.Handles
             return Encoding.UTF8.GetString(buffer);
         }
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern void free_string(IntPtr handle);
     }
 }

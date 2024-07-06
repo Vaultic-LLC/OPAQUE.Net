@@ -18,7 +18,7 @@ namespace Test
             OpaqueServer server = new OpaqueServer();
             OpaqueClient client = new OpaqueClient();
 
-            if (!server.CreateSetup(out string? serverSecret))
+            if (!server.CreateSetup(out string? serverSecret, out _))
             {
                 throw new Exception();
             }

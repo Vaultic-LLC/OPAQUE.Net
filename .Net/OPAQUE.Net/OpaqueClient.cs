@@ -110,17 +110,17 @@ namespace OPAQUE.Net
             return result != null;
         }
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StartClientRegistrationResultHandle? start_client_registration(string password);
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern FinishClientRegistrationResultHandle finish_client_registration(string password, string registrationResponse, 
             string clientRegistrationState, string? clientIdentifier, string? serverIdentifier);
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StartClientLoginResultHandle start_client_login(string password);
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern FinishClientLoginResultHandler? finish_client_login(string clientLoginState, string serverLoginResponse, string password, 
             string? clientIdentifier, string? serverIdentifier);
     }

@@ -23,12 +23,12 @@ namespace OPAQUE.Net.Types.Handles
             return null;
         }
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern void free_start_server_login_result(IntPtr handle);
 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StringHandle get_start_server_login_response_state(IntPtr handle); 
-        [DllImport("opaque.dll")]
+        [DllImport("opaque")]
         private static extern StringHandle get_start_server_login_response_response(IntPtr handle);
     }
 }
