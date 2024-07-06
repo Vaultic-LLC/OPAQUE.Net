@@ -31,8 +31,8 @@ Install-Package Vaultic.OPAQUE.Net
 
 The API is exposed through the `OpaqueServer` and `OpaqueClient` objects.
 ```cs
-OpaqueServer server = OpaqueFactory.CreateServer();
-OpaqueClient client = OpaqueFactory.CreateClient();
+OpaqueServer server = new OpaqueServer();
+OpaqueClient client = new OpaqueClient();
 ```
 
 ### Server Setup
