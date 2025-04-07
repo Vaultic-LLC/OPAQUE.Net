@@ -26,6 +26,7 @@ p256 = { version = "0.13", default-features = false, features = [
 base64 = "0.21.7"
 serde = { version = "1.0.169", features = ["derive"] }
 libc = "0.2"
+generic-array = "0.14"
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.

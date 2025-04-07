@@ -1,4 +1,5 @@
 use crate::csharp;
+use argon2::Argon2;
 use libc::c_char;
 use serde::{Deserialize, Serialize};
 
@@ -15,6 +16,28 @@ impl CustomIdentifiers {
             server: server_param,
         }
     }
+}
+
+#[derive(Default)]
+pub struct CustomKsf {
+    pub argon: Argon2<'static>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum KeyStretchingFunctionConfig {
+    #[serde(rename = "rfcDraftRecommended")]
+    RfcDraftRecommended,
+    #[serde(rename = "memoryConstrained")]
+    MemoryConstrained,
+    #[serde(rename = "custom")]
+    Custom {
+        #[serde(rename = "iterations")]
+        iterations: u32,
+        #[serde(rename = "memory")]
+        memory: u32,
+        #[serde(rename = "parallelism")]
+        parallelism: u32,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -142,6 +165,8 @@ pub struct FinishClientLoginParams {
     pub login_response: String,
     pub password: String,
     pub identifiers: Option<CustomIdentifiers>,
+    #[serde(rename = "keyStretchingConfig")]
+    pub key_stretching_function_config: KeyStretchingFunctionConfig,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -266,6 +291,8 @@ pub struct FinishClientRegistrationParams {
     #[serde(rename = "clientRegistrationState")]
     pub client_registration_state: String,
     pub identifiers: Option<CustomIdentifiers>,
+    #[serde(rename = "keyStretchingConfig")]
+    pub key_stretching_function_config: KeyStretchingFunctionConfig,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
