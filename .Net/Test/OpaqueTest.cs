@@ -7,7 +7,7 @@ namespace Test
     [TestClass]
     public class OpaqueTest
     {
-        private void SetupAndRegister(string userIdentifier, string password, string? clientIdentifier, string? serverIdentifier, 
+        private void SetupAndRegister(string userIdentifier, string password, string? clientIdentifier, string? serverIdentifier,
             out string serverSetup, out string registrationRecord, out string exportKey, out string serverStaticPublicKey)
         {
             serverSetup = "";
@@ -28,14 +28,14 @@ namespace Test
                 throw new Exception();
             }
 
-            if (!server.CreateRegistrationResponse(serverSecret!, userIdentifier, clientRegistrationResult!.RegistrationRequest, 
+            if (!server.CreateRegistrationResponse(serverSecret!, userIdentifier, clientRegistrationResult!.RegistrationRequest,
                 out string? serverRegistrationResponse))
             {
                 throw new Exception();
             }
 
             if (!client.FinishRegistration(password, serverRegistrationResponse!,
-                clientRegistrationResult.ClientRegistrationState, clientIdentifier, serverIdentifier, 
+                clientRegistrationResult.ClientRegistrationState, clientIdentifier, serverIdentifier,
                 out FinishClientRegistrationResult? finishRegistrationResult))
             {
                 throw new Exception();
@@ -54,7 +54,7 @@ namespace Test
             string password = "hunter42";
 
             SetupAndRegister(userIdentifier, password, null, null, out string serverSetup, out string registrationRecord,
-                out string exportKey, out string serverStaticPublicKey);         
+                out string exportKey, out string serverStaticPublicKey);
 
             OpaqueServer server = new OpaqueServer();
             OpaqueClient client = new OpaqueClient();
@@ -64,13 +64,13 @@ namespace Test
                 throw new Exception();
             }
 
-            if (!server.StartLogin(serverSetup, clientLoginResult!.StartLoginRequest, userIdentifier, registrationRecord, 
-                null, null, out StartServerLoginResult? serverLoginResult))
+            if (!server.StartLogin(serverSetup, clientLoginResult!.StartLoginRequest, userIdentifier, registrationRecord,
+                null, null, out StartServerLoginResult? serverLoginResult, out _))
             {
                 throw new Exception();
             }
 
-            if (!client.FinishLogin(clientLoginResult.ClientLoginState, serverLoginResult!.LoginResponse, password, 
+            if (!client.FinishLogin(clientLoginResult.ClientLoginState, serverLoginResult!.LoginResponse, password,
                 null, null, out FinishClientLoginResult? finishClientLoginResult))
             {
                 throw new Exception();
@@ -100,7 +100,7 @@ namespace Test
             string rightPassword = "hunter42";
             string wrongPassword = "hunter43";
 
-            SetupAndRegister(userIdentifier, rightPassword, null, null, out string serverSetup, 
+            SetupAndRegister(userIdentifier, rightPassword, null, null, out string serverSetup,
                 out string registrationRecord, out string exportKey, out string serverStaticPublicKey);
 
             OpaqueServer server = new OpaqueServer();
@@ -111,13 +111,13 @@ namespace Test
                 throw new Exception();
             }
 
-            if (!server.StartLogin(serverSetup, clientLoginResult!.StartLoginRequest, userIdentifier, registrationRecord, 
-                null, null, out StartServerLoginResult? serverLoginResult))
+            if (!server.StartLogin(serverSetup, clientLoginResult!.StartLoginRequest, userIdentifier, registrationRecord,
+                null, null, out StartServerLoginResult? serverLoginResult, out _))
             {
                 throw new Exception();
             }
 
-            client.FinishLogin(clientLoginResult.ClientLoginState, serverLoginResult!.LoginResponse, wrongPassword, null, 
+            client.FinishLogin(clientLoginResult.ClientLoginState, serverLoginResult!.LoginResponse, wrongPassword, null,
                 null, out FinishClientLoginResult? finishClientLoginResult);
 
             Assert.IsNull(finishClientLoginResult);
@@ -130,7 +130,7 @@ namespace Test
             string password = "hunter2";
             string clientIdentifier = "client123";
 
-            SetupAndRegister(userIdentifier, password, clientIdentifier, null, out string serverSetup, out string registrationRecord, 
+            SetupAndRegister(userIdentifier, password, clientIdentifier, null, out string serverSetup, out string registrationRecord,
                 out string exportKey, out string serverStaticPublicKey);
 
             OpaqueServer server = new OpaqueServer();
@@ -142,12 +142,12 @@ namespace Test
             }
 
             if (!server.StartLogin(serverSetup, startClientLoginResult!.StartLoginRequest, userIdentifier, registrationRecord,
-                clientIdentifier, null, out StartServerLoginResult? startServerLoginResult))
+                clientIdentifier, null, out StartServerLoginResult? startServerLoginResult, out _))
             {
                 throw new Exception();
             }
 
-            client.FinishLogin(startClientLoginResult.ClientLoginState, startServerLoginResult!.LoginResponse, password, clientIdentifier + "abc", 
+            client.FinishLogin(startClientLoginResult.ClientLoginState, startServerLoginResult!.LoginResponse, password, clientIdentifier + "abc",
                 null, out FinishClientLoginResult? finishClientLoginResult);
 
             Assert.IsNull(finishClientLoginResult);
@@ -160,7 +160,7 @@ namespace Test
             string password = "hunter2";
             string serverIdentifier = "server-ident";
 
-            SetupAndRegister(userIdentifier, password, null, serverIdentifier, out string serverSetup, out string registrationRecord, 
+            SetupAndRegister(userIdentifier, password, null, serverIdentifier, out string serverSetup, out string registrationRecord,
                 out string exportKey, out string serverStaticPublicKey);
 
             OpaqueServer server = new OpaqueServer();
@@ -171,8 +171,8 @@ namespace Test
                 throw new Exception();
             }
 
-            if (!server.StartLogin(serverSetup, startClientLoginResult!.StartLoginRequest, userIdentifier, registrationRecord, null, 
-                serverIdentifier + "-abc", out StartServerLoginResult? startServerLoginResult))
+            if (!server.StartLogin(serverSetup, startClientLoginResult!.StartLoginRequest, userIdentifier, registrationRecord, null,
+                serverIdentifier + "-abc", out StartServerLoginResult? startServerLoginResult, out _))
             {
                 throw new Exception();
             }
@@ -210,9 +210,9 @@ namespace Test
             Assert.ThrowsException<StringParamIsEmptyException>(() => server.CreateRegistrationResponse("Value", "", "Value", out _));
             Assert.ThrowsException<StringParamIsEmptyException>(() => server.CreateRegistrationResponse("Value", "Value", "", out _));
 
-            Assert.ThrowsException<StringParamIsEmptyException>(() => server.StartLogin("", "Value", "Value", null, null, null, out _));
-            Assert.ThrowsException<StringParamIsEmptyException>(() => server.StartLogin("Value", "", "Value", null, null, null, out _));
-            Assert.ThrowsException<StringParamIsEmptyException>(() => server.StartLogin("Value", "Value", "", null, null, null, out _));
+            Assert.ThrowsException<StringParamIsEmptyException>(() => server.StartLogin("", "Value", "Value", null, null, null, out _, out _));
+            Assert.ThrowsException<StringParamIsEmptyException>(() => server.StartLogin("Value", "", "Value", null, null, null, out _, out _));
+            Assert.ThrowsException<StringParamIsEmptyException>(() => server.StartLogin("Value", "Value", "", null, null, null, out _, out _));
 
             Assert.ThrowsException<StringParamIsEmptyException>(() => server.FinishLogin("", "Value", out _));
             Assert.ThrowsException<StringParamIsEmptyException>(() => server.FinishLogin("Value", "", out _));

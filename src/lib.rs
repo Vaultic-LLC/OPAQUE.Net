@@ -10,7 +10,6 @@ use opaque_ke::{
 };
 
 use base64::{engine::general_purpose as b64, Engine as _};
-use wasm_bindgen::prelude::*;
 
 mod csharp;
 use libc::c_char;
@@ -34,20 +33,6 @@ fn from_base64_error(context: &'static str) -> impl Fn(base64::DecodeError) -> E
 
 fn from_protocol_error(context: &'static str) -> impl Fn(ProtocolError) -> Error {
     move |error| Error::Protocol { context, error }
-}
-
-impl From<Error> for JsError {
-    fn from(err: Error) -> Self {
-        let msg = match err {
-            Error::Protocol { context, error } => {
-                format!("opaque protocol error at \"{}\"; {}", context, error)
-            }
-            Error::Base64 { context, error } => {
-                format!("base64 decoding failed at \"{}\"; {}", context, error)
-            }
-        };
-        JsError::new(&msg)
-    }
 }
 
 struct DefaultCipherSuite;
@@ -89,7 +74,7 @@ fn decode_server_setup(data: String) -> JsResult<ServerSetup<DefaultCipherSuite>
     })
 }
 
-fn internal_get_server_public_key(data: String) -> Result<String, JsError> {
+fn internal_get_server_public_key(data: String) -> Result<String, Error> {
     let server_setup = decode_server_setup(data)?;
     let pub_key = server_setup.keypair().public().serialize();
     Ok(BASE64.encode(pub_key))
@@ -137,7 +122,7 @@ fn get_identifiers(idents: &Option<types::CustomIdentifiers>) -> Identifiers {
 
 fn internal_create_server_registration_response(
     params: types::CreateServerRegistrationResponseParams,
-) -> Result<String, JsError> {
+) -> Result<String, Error> {
     let server_setup = decode_server_setup(params.server_setup)?;
     let registration_request_bytes =
         base64_decode("registrationRequest", params.registration_request)?;
@@ -154,7 +139,7 @@ fn internal_create_server_registration_response(
 
 fn internal_start_server_login(
     params: types::StartServerLoginParams,
-) -> Result<types::StartServerLoginResult, JsError> {
+) -> Result<types::StartServerLoginResult, Error> {
     let server_setup = decode_server_setup(params.server_setup)?;
     let registration_record_bytes = match params.registration_record {
         Some(pw) => base64_decode("registrationRecord", pw).map(Some),
@@ -197,7 +182,7 @@ fn internal_start_server_login(
     })
 }
 
-fn internal_finish_server_login(params: types::FinishServerLoginParams) -> Result<String, JsError> {
+fn internal_finish_server_login(params: types::FinishServerLoginParams) -> Result<String, Error> {
     let credential_finalization_bytes =
         base64_decode("finishLoginRequest", params.finish_login_request)?;
     let state_bytes = base64_decode("serverLoginState", params.server_login_state)?;
@@ -212,7 +197,7 @@ fn internal_finish_server_login(params: types::FinishServerLoginParams) -> Resul
     Ok(BASE64.encode(server_login_finish_result.session_key))
 }
 
-fn internal_start_client_login(password: String) -> Result<types::StartClientLoginResult, JsError> {
+fn internal_start_client_login(password: String) -> Result<types::StartClientLoginResult, Error> {
     let mut client_rng = OsRng;
     let client_login_start_result =
         ClientLogin::<DefaultCipherSuite>::start(&mut client_rng, password.as_bytes())
@@ -226,7 +211,7 @@ fn internal_start_client_login(password: String) -> Result<types::StartClientLog
 
 fn internal_finish_client_login(
     params: types::FinishClientLoginParams,
-) -> Result<types::FinishClientLoginResult, JsError> {
+) -> Result<types::FinishClientLoginResult, Error> {
     let credential_response_bytes = base64_decode("loginResponse", params.login_response)?;
     let state_bytes = base64_decode("clientLoginState", params.client_login_state)?;
     let state = ClientLogin::<DefaultCipherSuite>::deserialize(&state_bytes)
@@ -263,7 +248,7 @@ fn internal_finish_client_login(
 
 fn internal_start_client_registration(
     password: String,
-) -> Result<types::StartClientRegistrationResult, JsError> {
+) -> Result<types::StartClientRegistrationResult, Error> {
     let mut client_rng = OsRng;
 
     let client_registration_start_result =
@@ -279,7 +264,7 @@ fn internal_start_client_registration(
 
 fn internal_finish_client_registration(
     params: types::FinishClientRegistrationParams,
-) -> Result<types::FinishClientRegistrationResult, JsError> {
+) -> Result<types::FinishClientRegistrationResult, Error> {
     let registration_response_bytes =
         base64_decode("registrationResponse", params.registration_response)?;
     let mut rng: OsRng = OsRng;

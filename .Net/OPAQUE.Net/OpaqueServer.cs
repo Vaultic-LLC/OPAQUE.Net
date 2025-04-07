@@ -64,9 +64,9 @@ namespace OPAQUE.Net
         /// <param name="registrationRecord"><see cref="FinishClientRegistrationResult.RegistrationRecord"/> from <see cref="OpaqueClient.FinishRegistration(string, string, string, string?, string?, out FinishClientRegistrationResult?)"/></param>
         /// <param name="result">A <see cref="StartServerLoginResult"/> filled with data if successful</param>
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
-        public bool StartLogin(string serverSetup, string startLoginRequest, string userIdentifier, string? registrationRecord, out StartServerLoginResult? result)
+        public bool StartLogin(string serverSetup, string startLoginRequest, string userIdentifier, string? registrationRecord, out StartServerLoginResult? result, out Exception? e)
         {
-            return StartLogin(serverSetup, startLoginRequest, userIdentifier, registrationRecord, "", "", out result);
+            return StartLogin(serverSetup, startLoginRequest, userIdentifier, registrationRecord, "", "", out result, out e);
         }
 
         /// <summary>
@@ -81,14 +81,14 @@ namespace OPAQUE.Net
         /// <param name="result">A <see cref="StartServerLoginResult"/> filled with data if successful</param>
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool StartLogin(string serverSetup, string startLoginRequest, string userIdentifier, 
-            string? registrationRecord, string? clientIdentitiy, string? serverIdentity, out StartServerLoginResult? result)
+            string? registrationRecord, string? clientIdentitiy, string? serverIdentity, out StartServerLoginResult? result, out Exception? e)
         {
             StringParamIsEmptyException.ThrowIfEmpty(serverSetup, nameof(serverSetup));
             StringParamIsEmptyException.ThrowIfEmpty(startLoginRequest, nameof(startLoginRequest));
             StringParamIsEmptyException.ThrowIfEmpty(userIdentifier, nameof(userIdentifier));
 
             result = FunctionHelper.TryExecute(() => start_server_login(serverSetup, startLoginRequest, 
-                userIdentifier, registrationRecord ?? "", clientIdentitiy ?? "", serverIdentity ?? ""))?.GetAndRelease();
+                userIdentifier, registrationRecord ?? "", clientIdentitiy ?? "", serverIdentity ?? ""), out e)?.GetAndRelease();
 
             return result != null;
         }
