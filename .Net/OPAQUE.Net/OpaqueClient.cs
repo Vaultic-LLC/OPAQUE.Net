@@ -1,6 +1,7 @@
 ﻿using OPAQUE.Net.Helpers;
 using OPAQUE.Net.Types.Exceptions;
 using OPAQUE.Net.Types.Handles;
+using OPAQUE.Net.Types.Parameters;
 using OPAQUE.Net.Types.Results;
 using System.Runtime.InteropServices;
 
@@ -34,7 +35,7 @@ namespace OPAQUE.Net
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool FinishRegistration(string password, string registrationResponse, string clientRegistrationState, out FinishClientRegistrationResult? result)
         {
-            return FinishRegistration(password, registrationResponse, clientRegistrationState, "", "", out result);
+            return FinishRegistration(password, registrationResponse, clientRegistrationState, "", "", null, out result);
         }
 
         /// <summary>
@@ -46,16 +47,19 @@ namespace OPAQUE.Net
         /// <param name="clientIdentifier">Current client identifier</param>
         /// <param name="serverIdentifier">Current server identifier</param>
         /// <param name="result">A <see cref="FinishClientRegistrationResult"/> filled with data if successful</param>
+        /// <param name="config">The configuration representing what Argon2id parameters to use. Defaults to MemoryConstrained if not provided</param>
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool FinishRegistration(string password, string registrationResponse, string clientRegistrationState, 
-            string? clientIdentifier, string? serverIdentifier, out FinishClientRegistrationResult? result)
+            string? clientIdentifier, string? serverIdentifier, KSFConfig? config, out FinishClientRegistrationResult? result)
         {
             StringParamIsEmptyException.ThrowIfEmpty(password, nameof(password));
             StringParamIsEmptyException.ThrowIfEmpty(registrationResponse, nameof(registrationResponse));
             StringParamIsEmptyException.ThrowIfEmpty(clientRegistrationState, nameof(clientRegistrationState));
 
+            config ??= KSFConfig.Create(KSFConfigType.MemoryConstrained);
+
             result = FunctionHelper.TryExecute(() => finish_client_registration(password, registrationResponse, 
-                clientRegistrationState, clientIdentifier ?? "", serverIdentifier ?? ""))?.GetAndRelease();
+                clientRegistrationState, clientIdentifier ?? "", serverIdentifier ?? "", config.TypeString, config.Iterations, config.Memory, config.Parallelism))?.GetAndRelease();
 
             return result != null;
         }
@@ -84,7 +88,7 @@ namespace OPAQUE.Net
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool FinishLogin(string clientLoginState, string serverLoginResponse, string password, out FinishClientLoginResult? result)
         {
-            return FinishLogin(clientLoginState, serverLoginResponse, password, "", "", out result);
+            return FinishLogin(clientLoginState, serverLoginResponse, password, "", "", null, out result);
         }
 
         /// <summary>
@@ -96,16 +100,19 @@ namespace OPAQUE.Net
         /// <param name="clientIdentifier">Current client identifier</param>
         /// <param name="serverIdentifier">Current server identifier</param>
         /// <param name="result">A <see cref="FinishClientLoginResult"/> filled with data if successful</param>
+        /// <param name="config">The configuration representing what Argon2id parameters to use. Defaults to MemoryConstrained if not provided</param>
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool FinishLogin(string clientLoginState, string serverLoginResponse, string password, string? clientIdentifier, 
-            string? serverIdentifier, out FinishClientLoginResult? result)
+            string? serverIdentifier, KSFConfig? config, out FinishClientLoginResult? result)
         {
             StringParamIsEmptyException.ThrowIfEmpty(clientLoginState, nameof(clientLoginState));
             StringParamIsEmptyException.ThrowIfEmpty(serverLoginResponse, nameof(serverLoginResponse));
             StringParamIsEmptyException.ThrowIfEmpty(password, nameof(password));
 
+            config ??= KSFConfig.Create(KSFConfigType.MemoryConstrained);
+
             result = FunctionHelper.TryExecute(() => finish_client_login(clientLoginState, serverLoginResponse, 
-                password, clientIdentifier ?? "", serverIdentifier ?? ""))?.GetAndRelease();
+                password, clientIdentifier ?? "", serverIdentifier ?? "", config.TypeString, config.Iterations, config.Memory, config.Parallelism))?.GetAndRelease();
 
             return result != null;
         }
@@ -115,13 +122,13 @@ namespace OPAQUE.Net
 
         [DllImport("opaque")]
         private static extern FinishClientRegistrationResultHandle finish_client_registration(string password, string registrationResponse, 
-            string clientRegistrationState, string? clientIdentifier, string? serverIdentifier);
+            string clientRegistrationState, string? clientIdentifier, string? serverIdentifier, string configType, string iterations, string memory, string parallelism);
 
         [DllImport("opaque")]
         private static extern StartClientLoginResultHandle start_client_login(string password);
 
         [DllImport("opaque")]
         private static extern FinishClientLoginResultHandler? finish_client_login(string clientLoginState, string serverLoginResponse, string password, 
-            string? clientIdentifier, string? serverIdentifier);
+            string? clientIdentifier, string? serverIdentifier, string configType, string iterations, string memory, string parallelism);
     }
 }

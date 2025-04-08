@@ -1,6 +1,7 @@
-use argon2::Argon2;
+use argon2::{Algorithm, Argon2, ParamsBuilder, Version};
 use opaque_ke::ciphersuite::CipherSuite;
-use opaque_ke::errors::ProtocolError;
+use opaque_ke::errors::{InternalError, ProtocolError};
+use opaque_ke::ksf::{self, Ksf};
 use opaque_ke::rand::rngs::OsRng;
 use opaque_ke::{
     ClientLogin, ClientLoginFinishParameters, ClientRegistration,
@@ -10,6 +11,7 @@ use opaque_ke::{
 };
 
 use base64::{engine::general_purpose as b64, Engine as _};
+use generic_array::{ArrayLength, GenericArray};
 
 mod csharp;
 use libc::c_char;
@@ -24,6 +26,10 @@ enum Error {
     Base64 {
         context: &'static str,
         error: base64::DecodeError,
+    },
+    Internal {
+        context: &'static str,
+        error: InternalError,
     },
 }
 
@@ -42,7 +48,7 @@ impl CipherSuite for DefaultCipherSuite {
     type OprfCs = opaque_ke::Ristretto255;
     type KeGroup = opaque_ke::Ristretto255;
     type KeyExchange = opaque_ke::key_exchange::tripledh::TripleDh;
-    type Ksf = Argon2<'static>;
+    type Ksf = types::CustomKsf;
 }
 
 #[cfg(feature = "p256")]
@@ -50,12 +56,69 @@ impl CipherSuite for DefaultCipherSuite {
     type OprfCs = p256::NistP256;
     type KeGroup = p256::NistP256;
     type KeyExchange = opaque_ke::key_exchange::tripledh::TripleDh;
-    type Ksf = Argon2<'static>;
+    type Ksf = types::CustomKsf;
 }
 
 const BASE64: b64::GeneralPurpose = b64::URL_SAFE_NO_PAD;
 
 type JsResult<T> = Result<T, Error>;
+
+const INVALID_KSF_COMBINATION_ERROR: Error = Error::Internal {
+    context: "Invalid keyStretching (argon2id) combination",
+    error: InternalError::KsfError,
+};
+
+impl Ksf for types::CustomKsf {
+    fn hash<L: ArrayLength<u8>>(
+        &self,
+        input: GenericArray<u8, L>,
+    ) -> Result<GenericArray<u8, L>, InternalError> {
+        let mut output = GenericArray::default();
+        self.argon
+            .hash_password_into(&input, &[0; argon2::RECOMMENDED_SALT_LEN], &mut output)
+            .map_err(|_| InternalError::KsfError)?;
+        Ok(output)
+    }
+}
+
+fn build_argon2_ksf(
+    t_cost: u32,
+    m_cost: u32,
+    parallelism: u32,
+) -> Result<Option<types::CustomKsf>, Error> {
+    let mut param_builder = ParamsBuilder::default();
+    param_builder.t_cost(t_cost);
+    param_builder.m_cost(m_cost);
+    param_builder.p_cost(parallelism);
+
+    if let Ok(params) = param_builder.build() {
+        let argon = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
+        return Ok(Some(types::CustomKsf { argon }));
+    }
+
+    Err(INVALID_KSF_COMBINATION_ERROR)
+}
+
+fn get_custom_ksf(
+    ksf_config: types::KeyStretchingFunctionConfig,
+) -> Result<Option<types::CustomKsf>, Error> {
+    match ksf_config {
+        // https://www.ietf.org/archive/id/draft-irtf-cfrg-opaque-17.html#name-configurations
+        // using the recommended parameters for Argon2id except we use 2^21-1 since 2^21 crashes in browsers
+        types::KeyStretchingFunctionConfig::RfcDraftRecommended => {
+            build_argon2_ksf(1, u32::pow(2, 21) - 1, 4)
+        }
+        // https://www.rfc-editor.org/rfc/rfc9106.html#section-4-6.2
+        types::KeyStretchingFunctionConfig::MemoryConstrained => {
+            build_argon2_ksf(3, u32::pow(2, 16), 4)
+        }
+        types::KeyStretchingFunctionConfig::Custom {
+            iterations,
+            memory,
+            parallelism,
+        } => build_argon2_ksf(iterations, memory, parallelism),
+    }
+}
 
 fn base64_decode<T: AsRef<[u8]>>(context: &'static str, input: T) -> JsResult<Vec<u8>> {
     BASE64.decode(input).map_err(from_base64_error(context))
@@ -107,6 +170,46 @@ fn try_create_identifiers(
         optional_rust_client,
         optional_rust_server,
     ));
+}
+
+fn try_create_ksf_config(
+    csharp_config_type: *mut c_char,
+    charp_config_iterations: *mut c_char,
+    charp_config_memory: *mut c_char,
+    charp_config_parallelism: *mut c_char,
+) -> Result<types::KeyStretchingFunctionConfig, Error> {
+    let ksf_config_type: String = csharp::csharp_string_to_rust_string(csharp_config_type);
+
+    let ksf = match ksf_config_type.as_str() {
+        "rfcDraftRecommended" => Ok(types::KeyStretchingFunctionConfig::RfcDraftRecommended),
+        "memoryConstrained" => Ok(types::KeyStretchingFunctionConfig::MemoryConstrained),
+        "custom" => {
+            let iterations: String = csharp::csharp_string_to_rust_string(charp_config_iterations);
+            if iterations.is_empty() {
+                return Err(INVALID_KSF_COMBINATION_ERROR);
+            }
+
+            let memory: String = csharp::csharp_string_to_rust_string(charp_config_memory);
+            if memory.is_empty() {
+                return Err(INVALID_KSF_COMBINATION_ERROR);
+            }
+
+            let parallelism: String =
+                csharp::csharp_string_to_rust_string(charp_config_parallelism);
+            if parallelism.is_empty() {
+                return Err(INVALID_KSF_COMBINATION_ERROR);
+            }
+
+            Ok(types::KeyStretchingFunctionConfig::Custom {
+                iterations: iterations.parse().unwrap(),
+                memory: memory.parse().unwrap(),
+                parallelism: parallelism.parse().unwrap(),
+            })
+        }
+        _ => Err(INVALID_KSF_COMBINATION_ERROR),
+    };
+
+    ksf
 }
 
 fn get_identifiers(idents: &Option<types::CustomIdentifiers>) -> Identifiers {
@@ -212,13 +315,17 @@ fn internal_start_client_login(password: String) -> Result<types::StartClientLog
 fn internal_finish_client_login(
     params: types::FinishClientLoginParams,
 ) -> Result<types::FinishClientLoginResult, Error> {
+    let custom_ksf = get_custom_ksf(params.key_stretching_function_config)?;
     let credential_response_bytes = base64_decode("loginResponse", params.login_response)?;
     let state_bytes = base64_decode("clientLoginState", params.client_login_state)?;
     let state = ClientLogin::<DefaultCipherSuite>::deserialize(&state_bytes)
         .map_err(from_protocol_error("deserialize clientLoginState"))?;
 
-    let finish_params =
-        ClientLoginFinishParameters::new(None, get_identifiers(&params.identifiers), None);
+    let finish_params = ClientLoginFinishParameters::new(
+        None,
+        get_identifiers(&params.identifiers),
+        custom_ksf.as_ref(),
+    );
 
     let result = state.finish(
         params.password.as_bytes(),
@@ -265,6 +372,8 @@ fn internal_start_client_registration(
 fn internal_finish_client_registration(
     params: types::FinishClientRegistrationParams,
 ) -> Result<types::FinishClientRegistrationResult, Error> {
+    let custom_ksf = get_custom_ksf(params.key_stretching_function_config)?;
+
     let registration_response_bytes =
         base64_decode("registrationResponse", params.registration_response)?;
     let mut rng: OsRng = OsRng;
@@ -273,8 +382,10 @@ fn internal_finish_client_registration(
     let state = ClientRegistration::<DefaultCipherSuite>::deserialize(&client_registration)
         .map_err(from_protocol_error("deserialize clientRegistrationState"))?;
 
-    let finish_params =
-        ClientRegistrationFinishParameters::new(get_identifiers(&params.identifiers), None);
+    let finish_params = ClientRegistrationFinishParameters::new(
+        get_identifiers(&params.identifiers),
+        custom_ksf.as_ref(),
+    );
 
     let client_finish_registration_result = state
         .finish(
@@ -303,6 +414,10 @@ pub fn finish_client_registration(
     csharp_client_registration_state: *mut c_char,
     csharp_client_identifier: *mut c_char,
     csharp_server_identifeir: *mut c_char,
+    csharp_config_type: *mut c_char,
+    charp_config_iterations: *mut c_char,
+    charp_config_memory: *mut c_char,
+    charp_config_parallelism: *mut c_char,
 ) -> *mut types::FinishClientRegistrationResult {
     let rust_password: String = csharp::csharp_string_to_rust_string(csharp_password);
     let rust_registration_response: String =
@@ -312,20 +427,41 @@ pub fn finish_client_registration(
     let identifiers: Option<types::CustomIdentifiers> =
         try_create_identifiers(csharp_client_identifier, csharp_server_identifeir);
 
-    if let Ok(result) = internal_finish_client_registration(types::FinishClientRegistrationParams {
-        password: rust_password,
-        registration_response: rust_registration_response,
-        client_registration_state: rust_client_registration_state,
-        identifiers: identifiers,
-    }) {
-        return Box::into_raw(Box::new(result));
-    }
+    let ksf_config = try_create_ksf_config(
+        csharp_config_type,
+        charp_config_iterations,
+        charp_config_memory,
+        charp_config_parallelism,
+    );
 
-    Box::into_raw(Box::new(types::FinishClientRegistrationResult {
-        registration_record: "".to_string(),
-        export_key: "".to_string(),
-        server_static_public_key: "".to_string(),
-    }))
+    let result = match ksf_config {
+        Ok(v) => {
+            if let Ok(result) =
+                internal_finish_client_registration(types::FinishClientRegistrationParams {
+                    password: rust_password,
+                    registration_response: rust_registration_response,
+                    client_registration_state: rust_client_registration_state,
+                    identifiers: identifiers,
+                    key_stretching_function_config: v,
+                })
+            {
+                return Box::into_raw(Box::new(result));
+            }
+
+            Box::into_raw(Box::new(types::FinishClientRegistrationResult {
+                registration_record: "".to_string(),
+                export_key: "".to_string(),
+                server_static_public_key: "".to_string(),
+            }))
+        }
+        Err(e) => Box::into_raw(Box::new(types::FinishClientRegistrationResult {
+            registration_record: "".to_string(),
+            export_key: "".to_string(),
+            server_static_public_key: "".to_string(),
+        })),
+    };
+
+    result
 }
 
 #[no_mangle]
@@ -449,6 +585,10 @@ pub fn finish_client_login(
     csharp_password: *mut c_char,
     csharp_client_identifier: *mut c_char,
     csharp_server_identifeir: *mut c_char,
+    csharp_config_type: *mut c_char,
+    charp_config_iterations: *mut c_char,
+    charp_config_memory: *mut c_char,
+    charp_config_parallelism: *mut c_char,
 ) -> *mut types::FinishClientLoginResult {
     let rust_client_login_state: String =
         csharp::csharp_string_to_rust_string(csharp_client_login_state);
@@ -457,21 +597,41 @@ pub fn finish_client_login(
     let identifiers: Option<types::CustomIdentifiers> =
         try_create_identifiers(csharp_client_identifier, csharp_server_identifeir);
 
-    if let Ok(result) = internal_finish_client_login(types::FinishClientLoginParams {
-        client_login_state: rust_client_login_state,
-        login_response: rust_login_response,
-        password: rust_password,
-        identifiers: identifiers,
-    }) {
-        return Box::into_raw(Box::new(result));
-    }
+    let ksf_config = try_create_ksf_config(
+        csharp_config_type,
+        charp_config_iterations,
+        charp_config_memory,
+        charp_config_parallelism,
+    );
 
-    Box::into_raw(Box::new(types::FinishClientLoginResult {
-        finish_login_request: "".to_string(),
-        session_key: "".to_string(),
-        export_key: "".to_string(),
-        server_static_public_key: "".to_string(),
-    }))
+    let result = match ksf_config {
+        Ok(v) => {
+            if let Ok(result) = internal_finish_client_login(types::FinishClientLoginParams {
+                client_login_state: rust_client_login_state,
+                login_response: rust_login_response,
+                password: rust_password,
+                identifiers: identifiers,
+                key_stretching_function_config: v,
+            }) {
+                return Box::into_raw(Box::new(result));
+            }
+
+            Box::into_raw(Box::new(types::FinishClientLoginResult {
+                finish_login_request: "".to_string(),
+                session_key: "".to_string(),
+                export_key: "".to_string(),
+                server_static_public_key: "".to_string(),
+            }))
+        }
+        Err(e) => Box::into_raw(Box::new(types::FinishClientLoginResult {
+            finish_login_request: "".to_string(),
+            session_key: "".to_string(),
+            export_key: "".to_string(),
+            server_static_public_key: "".to_string(),
+        })),
+    };
+
+    result
 }
 
 #[no_mangle]
