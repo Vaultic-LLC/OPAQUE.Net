@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Platforms>x64</Platforms>
+    <Platforms>x64;arm64</Platforms>
 	<EnablePackageValidation>true</EnablePackageValidation>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<NoWarn>$(NoWarn);CS1591</NoWarn>
@@ -17,7 +17,7 @@
 	<RepositoryUrl>https://github.com/Vaultic-LLC/OPAQUE.Net</RepositoryUrl>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
-	<PlatformTarget>x64</PlatformTarget>
+	<PlatformTarget>AnyCPU</PlatformTarget>
 	<Version>1.3.0</Version>
   </PropertyGroup>
 
@@ -33,14 +33,38 @@
   </ItemGroup>
 
   <ItemGroup>
-	<None Update="libopaque.so">
-		<Pack>True</Pack>
-		<PackagePath>runtimes/linux-x64/native/</PackagePath>
-		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	</None>
+    <!-- Linux x64: committed to repo -->
+    <None Update="libopaque.so">
+      <Pack>True</Pack>
+      <PackagePath>runtimes/linux-x64/native/libopaque.so</PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <!-- Linux ARM64: committed to repo -->
+    <None Update="libopaque-linux-arm64.so">
+      <Pack>True</Pack>
+      <PackagePath>runtimes/linux-arm64/native/libopaque.so</PackagePath>
+    </None>
+    <!-- Windows x64: committed to repo -->
     <None Update="opaque.dll">
       <Pack>True</Pack>
-      <PackagePath>runtimes/win-x64/native/</PackagePath>
+      <PackagePath>runtimes/win-x64/native/opaque.dll</PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <!-- Windows ARM64: committed to repo -->
+    <None Update="opaque-arm64.dll">
+      <Pack>True</Pack>
+      <PackagePath>runtimes/win-arm64/native/opaque.dll</PackagePath>
+    </None>
+    <!-- macOS ARM64: committed to repo -->
+    <None Update="libopaque.dylib">
+      <Pack>True</Pack>
+      <PackagePath>runtimes/osx-arm64/native/libopaque.dylib</PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <!-- macOS x64: committed to repo -->
+    <None Update="libopaque-x64.dylib">
+      <Pack>True</Pack>
+      <PackagePath>runtimes/osx-x64/native/libopaque.dylib</PackagePath>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,15 +1,25 @@
 on:
   pull_request:
     branches:
-    - main 
+    - main
 
 jobs:
   build_and_run_tests:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux-x64
+          - os: macos-latest
+            name: macos-arm64
+    runs-on: ${{ matrix.os }}
+    name: Build and test (${{ matrix.name }})
     timeout-minutes: 15
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
     - name: Build
       run: dotnet build --configuration Release
     - name: Test
