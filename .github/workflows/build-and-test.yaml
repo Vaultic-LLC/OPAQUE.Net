@@ -133,7 +133,11 @@ jobs:
           if ! command -v cargo-zigbuild >/dev/null 2>&1; then
             cargo install --locked cargo-zigbuild
           fi
-          cargo zigbuild --version
+          # Not `cargo zigbuild --version`: that routes --version into the zigbuild subcommand,
+          # which rejects it. Check the thing most likely to actually be broken instead — that zig
+          # itself is reachable — plus that the binary landed on PATH.
+          python3 -m ziglang version
+          command -v cargo-zigbuild
 
       # --locked so the build fails loudly rather than silently resolving a different dependency
       # graph than the one Cargo.lock records; the output of this step gets committed.
