@@ -4,7 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Platforms>x64;arm64</Platforms>
     <EnablePackageValidation>true</EnablePackageValidation>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
@@ -17,7 +16,12 @@
     <RepositoryUrl>https://github.com/Vaultic-LLC/OPAQUE.Net</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <!-- The managed assembly is architecture neutral; the native library is selected per RID. -->
+    <!--
+      The managed assembly is architecture neutral; the native library is selected per RID below.
+      Stated explicitly rather than left to default: a project that lets PlatformTarget fall through
+      to $(Platform) gets stamped with that architecture, and a test assembly stamped x64 cannot run
+      on an arm64 machine at all.
+    -->
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Version>1.4.0</Version>
   </PropertyGroup>

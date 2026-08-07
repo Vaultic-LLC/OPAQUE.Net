@@ -221,10 +221,13 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      # Build and test through the solution, not the individual projects. The solution pins
-      # Platform=x64, which puts the output under bin/x64/; running `dotnet test` against
-      # Test.csproj directly would default to Platform=AnyCPU and look in bin/ instead, and
-      # --no-build would then fail to find the assembly that was just built.
+      # Both projects are AnyCPU, so a solution build and a bare project build resolve the same
+      # output directory (bin/<config>/net8.0) and --no-build is safe either way. Going through the
+      # solution just exercises both projects in one command.
+      #
+      # Do not reintroduce a <Platforms>/Platform pin here or in the csproj files: it stamps the
+      # test assembly with that architecture, and VSTest then demands a matching dotnet host, which
+      # does not exist on the arm64 runners.
       - name: Build
         run: dotnet build .Net/OPAQUE.Net/OPAQUE.Net.sln --configuration Release
 
