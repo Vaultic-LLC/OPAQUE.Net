@@ -1,6 +1,9 @@
 /target
 **/*.rs.bk
-Cargo.lock
+# Cargo.lock is deliberately committed. This crate is not consumed as a Rust library; it is a
+# cdylib compiled into a binary that ships inside the NuGet package, and CI rebuilds those binaries
+# and only proposes them when the bytes change. An unpinned dependency graph would make that
+# comparison meaningless, and `cargo build --locked` cannot create a lockfile it does not find.
 pkg/
 wasm-pack.log
 node_modules
