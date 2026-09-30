@@ -23,12 +23,12 @@ namespace OPAQUE.Net.Types.Handles
             return null;
         }
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern void free_start_client_registration_result(IntPtr handle);
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern StringHandle get_start_client_registration_result_state(IntPtr handle);
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern StringHandle get_start_client_registration_result_request(IntPtr handle);
     }
 }
