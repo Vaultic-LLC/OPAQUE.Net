@@ -2,6 +2,12 @@
 {
     public class KSFConfig
     {
+        public const int MinimumMemoryKiB = 64 * 1024;
+        public const int MaximumCustomMemoryKiB = 1024 * 1024;
+        public const int MinimumIterations = 1;
+        public const int MaximumIterations = 10;
+        public const int MinimumParallelism = 1;
+        public const int MaximumParallelism = 16;
         public KSFConfigType Type { get; private set; } = KSFConfigType.MemoryConstrained;
 
         public string Iterations { get; private set; } = string.Empty;
@@ -33,8 +39,15 @@
             {
                 if (iterations == null || memory == null || parallelism == null)
                 {
-                    throw new ArgumentException();
+                    throw new ArgumentException("Custom KSF configuration requires iterations, memory, and parallelism.");
                 }
+
+                ArgumentOutOfRangeException.ThrowIfLessThan(iterations.Value, MinimumIterations, nameof(iterations));
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(iterations.Value, MaximumIterations, nameof(iterations));
+                ArgumentOutOfRangeException.ThrowIfLessThan(memory.Value, MinimumMemoryKiB, nameof(memory));
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(memory.Value, MaximumCustomMemoryKiB, nameof(memory));
+                ArgumentOutOfRangeException.ThrowIfLessThan(parallelism.Value, MinimumParallelism, nameof(parallelism));
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(parallelism.Value, MaximumParallelism, nameof(parallelism));
 
                 return new KSFConfig()
                 {

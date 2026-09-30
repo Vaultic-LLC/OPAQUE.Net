@@ -1,7 +1,7 @@
 use argon2::{Algorithm, Argon2, ParamsBuilder, Version};
 use opaque_ke::ciphersuite::CipherSuite;
 use opaque_ke::errors::{InternalError, ProtocolError};
-use opaque_ke::ksf::{self, Ksf};
+use opaque_ke::ksf::Ksf;
 use opaque_ke::rand::rngs::OsRng;
 use opaque_ke::{
     ClientLogin, ClientLoginFinishParameters, ClientRegistration,
@@ -19,26 +19,17 @@ use libc::c_char;
 mod types;
 
 enum Error {
-    Protocol {
-        context: &'static str,
-        error: ProtocolError,
-    },
-    Base64 {
-        context: &'static str,
-        error: base64::DecodeError,
-    },
-    Internal {
-        context: &'static str,
-        error: InternalError,
-    },
+    Protocol,
+    Base64,
+    Internal,
 }
 
-fn from_base64_error(context: &'static str) -> impl Fn(base64::DecodeError) -> Error {
-    move |error| Error::Base64 { context, error }
+fn from_base64_error(_: &'static str) -> impl Fn(base64::DecodeError) -> Error {
+    |_| Error::Base64
 }
 
-fn from_protocol_error(context: &'static str) -> impl Fn(ProtocolError) -> Error {
-    move |error| Error::Protocol { context, error }
+fn from_protocol_error(_: &'static str) -> impl Fn(ProtocolError) -> Error {
+    |_| Error::Protocol
 }
 
 struct DefaultCipherSuite;
@@ -60,13 +51,15 @@ impl CipherSuite for DefaultCipherSuite {
 }
 
 const BASE64: b64::GeneralPurpose = b64::URL_SAFE_NO_PAD;
+const MAX_ENCODED_PROTOCOL_MESSAGE_LEN: usize = 64 * 1024;
+const MIN_CUSTOM_MEMORY_KIB: u32 = 64 * 1024;
+const MAX_CUSTOM_MEMORY_KIB: u32 = 1024 * 1024;
+const MAX_CUSTOM_ITERATIONS: u32 = 10;
+const MAX_CUSTOM_PARALLELISM: u32 = 16;
 
 type JsResult<T> = Result<T, Error>;
 
-const INVALID_KSF_COMBINATION_ERROR: Error = Error::Internal {
-    context: "Invalid keyStretching (argon2id) combination",
-    error: InternalError::KsfError,
-};
+const INVALID_KSF_COMBINATION_ERROR: Error = Error::Internal;
 
 impl Ksf for types::CustomKsf {
     fn hash<L: ArrayLength<u8>>(
@@ -103,12 +96,9 @@ fn get_custom_ksf(
     ksf_config: types::KeyStretchingFunctionConfig,
 ) -> Result<Option<types::CustomKsf>, Error> {
     match ksf_config {
-        // https://www.ietf.org/archive/id/draft-irtf-cfrg-opaque-17.html#name-configurations
-        // using the recommended parameters for Argon2id except we use 2^21-1 since 2^21 crashes in browsers
         types::KeyStretchingFunctionConfig::RfcDraftRecommended => {
             build_argon2_ksf(1, u32::pow(2, 21) - 1, 4)
         }
-        // https://www.rfc-editor.org/rfc/rfc9106.html#section-4-6.2
         types::KeyStretchingFunctionConfig::MemoryConstrained => {
             build_argon2_ksf(3, u32::pow(2, 16), 4)
         }
@@ -116,11 +106,22 @@ fn get_custom_ksf(
             iterations,
             memory,
             parallelism,
-        } => build_argon2_ksf(iterations, memory, parallelism),
+        } => {
+            if !(1..=MAX_CUSTOM_ITERATIONS).contains(&iterations)
+                || !(MIN_CUSTOM_MEMORY_KIB..=MAX_CUSTOM_MEMORY_KIB).contains(&memory)
+                || !(1..=MAX_CUSTOM_PARALLELISM).contains(&parallelism)
+            {
+                return Err(INVALID_KSF_COMBINATION_ERROR);
+            }
+            build_argon2_ksf(iterations, memory, parallelism)
+        }
     }
 }
 
 fn base64_decode<T: AsRef<[u8]>>(context: &'static str, input: T) -> JsResult<Vec<u8>> {
+    if input.as_ref().len() > MAX_ENCODED_PROTOCOL_MESSAGE_LEN {
+        return Err(INVALID_KSF_COMBINATION_ERROR);
+    }
     BASE64.decode(input).map_err(from_base64_error(context))
 }
 
@@ -201,9 +202,13 @@ fn try_create_ksf_config(
             }
 
             Ok(types::KeyStretchingFunctionConfig::Custom {
-                iterations: iterations.parse().unwrap(),
-                memory: memory.parse().unwrap(),
-                parallelism: parallelism.parse().unwrap(),
+                iterations: iterations
+                    .parse()
+                    .map_err(|_| INVALID_KSF_COMBINATION_ERROR)?,
+                memory: memory.parse().map_err(|_| INVALID_KSF_COMBINATION_ERROR)?,
+                parallelism: parallelism
+                    .parse()
+                    .map_err(|_| INVALID_KSF_COMBINATION_ERROR)?,
             })
         }
         _ => Err(INVALID_KSF_COMBINATION_ERROR),
@@ -212,7 +217,7 @@ fn try_create_ksf_config(
     ksf
 }
 
-fn get_identifiers(idents: &Option<types::CustomIdentifiers>) -> Identifiers {
+fn get_identifiers(idents: &Option<types::CustomIdentifiers>) -> Identifiers<'_> {
     Identifiers {
         client: idents
             .as_ref()
@@ -335,7 +340,6 @@ fn internal_finish_client_login(
     );
 
     if result.is_err() {
-        // Client-detected login failure
         return Ok(types::FinishClientLoginResult {
             finish_login_request: "".to_string(),
             session_key: "".to_string(),
@@ -408,7 +412,7 @@ fn internal_finish_client_registration(
 }
 
 #[no_mangle]
-pub fn finish_client_registration(
+pub extern "C" fn finish_client_registration(
     csharp_password: *mut c_char,
     csharp_registration_response: *mut c_char,
     csharp_client_registration_state: *mut c_char,
@@ -454,7 +458,7 @@ pub fn finish_client_registration(
                 server_static_public_key: "".to_string(),
             }))
         }
-        Err(e) => Box::into_raw(Box::new(types::FinishClientRegistrationResult {
+        Err(_) => Box::into_raw(Box::new(types::FinishClientRegistrationResult {
             registration_record: "".to_string(),
             export_key: "".to_string(),
             server_static_public_key: "".to_string(),
@@ -465,12 +469,12 @@ pub fn finish_client_registration(
 }
 
 #[no_mangle]
-pub fn create_server_setup() -> *mut c_char {
+pub extern "C" fn create_server_setup() -> *mut c_char {
     csharp::rust_string_to_csharp_string_handle(internal_create_server_setup())
 }
 
 #[no_mangle]
-pub fn get_server_public_key(data: *mut c_char) -> *mut c_char {
+pub extern "C" fn get_server_public_key(data: *mut c_char) -> *mut c_char {
     let secret: String = csharp::csharp_string_to_rust_string(data);
     if let Ok(public_key) = internal_get_server_public_key(secret) {
         return csharp::rust_string_to_csharp_string_handle(public_key);
@@ -480,7 +484,7 @@ pub fn get_server_public_key(data: *mut c_char) -> *mut c_char {
 }
 
 #[no_mangle]
-pub fn create_server_registration_response(
+pub extern "C" fn create_server_registration_response(
     csharp_server_setup: *mut c_char,
     csharp_user_identifier: *mut c_char,
     csharp_registration_request: *mut c_char,
@@ -504,7 +508,7 @@ pub fn create_server_registration_response(
 }
 
 #[no_mangle]
-pub fn start_server_login(
+pub extern "C" fn start_server_login(
     csharp_server_setup: *mut c_char,
     csharp_start_login_request: *mut c_char,
     csharp_user_identifier: *mut c_char,
@@ -546,7 +550,7 @@ pub fn start_server_login(
 }
 
 #[no_mangle]
-pub fn finish_server_login(
+pub extern "C" fn finish_server_login(
     csharp_server_login_state: *mut c_char,
     csharp_finish_login_request: *mut c_char,
 ) -> *mut c_char {
@@ -566,7 +570,9 @@ pub fn finish_server_login(
 }
 
 #[no_mangle]
-pub fn start_client_login(csharp_password: *mut c_char) -> *mut types::StartClientLoginResult {
+pub extern "C" fn start_client_login(
+    csharp_password: *mut c_char,
+) -> *mut types::StartClientLoginResult {
     let rust_password: String = csharp::csharp_string_to_rust_string(csharp_password);
     if let Ok(result) = internal_start_client_login(rust_password) {
         return Box::into_raw(Box::new(result));
@@ -579,7 +585,7 @@ pub fn start_client_login(csharp_password: *mut c_char) -> *mut types::StartClie
 }
 
 #[no_mangle]
-pub fn finish_client_login(
+pub extern "C" fn finish_client_login(
     csharp_client_login_state: *mut c_char,
     csharp_login_response: *mut c_char,
     csharp_password: *mut c_char,
@@ -623,7 +629,7 @@ pub fn finish_client_login(
                 server_static_public_key: "".to_string(),
             }))
         }
-        Err(e) => Box::into_raw(Box::new(types::FinishClientLoginResult {
+        Err(_) => Box::into_raw(Box::new(types::FinishClientLoginResult {
             finish_login_request: "".to_string(),
             session_key: "".to_string(),
             export_key: "".to_string(),
@@ -635,7 +641,7 @@ pub fn finish_client_login(
 }
 
 #[no_mangle]
-pub fn start_client_registration(
+pub extern "C" fn start_client_registration(
     csharp_password: *mut c_char,
 ) -> *mut types::StartClientRegistrationResult {
     let rust_password: String = csharp::csharp_string_to_rust_string(csharp_password);

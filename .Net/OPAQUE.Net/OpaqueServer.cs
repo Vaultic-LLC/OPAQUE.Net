@@ -61,8 +61,9 @@ namespace OPAQUE.Net
         /// <param name="serverSetup">String from <see cref="OpaqueServer.CreateSetup(out string?)"/></param>
         /// <param name="startLoginRequest"><see cref="StartClientLoginResult.StartLoginRequest"/> from <see cref="OpaqueClient.StartLogin(string, out StartClientLoginResult?)"/></param>
         /// <param name="userIdentifier">Current user identifier</param>
-        /// <param name="registrationRecord"><see cref="FinishClientRegistrationResult.RegistrationRecord"/> from <see cref="OpaqueClient.FinishRegistration(string, string, string, string?, string?, out FinishClientRegistrationResult?)"/></param>
+        /// <param name="registrationRecord"><see cref="FinishClientRegistrationResult.RegistrationRecord"/> from <see cref="OpaqueClient.FinishRegistration(string, string, string, string?, string?, OPAQUE.Net.Types.Parameters.KSFConfig, out FinishClientRegistrationResult?)"/></param>
         /// <param name="result">A <see cref="StartServerLoginResult"/> filled with data if successful</param>
+        /// <param name="e">The infrastructure exception, if the native call fails</param>
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool StartLogin(string serverSetup, string startLoginRequest, string userIdentifier, string? registrationRecord, out StartServerLoginResult? result, out Exception? e)
         {
@@ -75,10 +76,11 @@ namespace OPAQUE.Net
         /// <param name="serverSetup">String from <see cref="OpaqueServer.CreateSetup(out string?)"/></param>
         /// <param name="startLoginRequest"><see cref="StartClientLoginResult.StartLoginRequest"/> from <see cref="OpaqueClient.StartLogin(string, out StartClientLoginResult?)"/></param>
         /// <param name="userIdentifier">Current user identifier</param>
-        /// <param name="registrationRecord"><see cref="FinishClientRegistrationResult.RegistrationRecord"/> from <see cref="OpaqueClient.FinishRegistration(string, string, string, string?, string?, out FinishClientRegistrationResult?)"/></param>
+        /// <param name="registrationRecord"><see cref="FinishClientRegistrationResult.RegistrationRecord"/> from <see cref="OpaqueClient.FinishRegistration(string, string, string, string?, string?, OPAQUE.Net.Types.Parameters.KSFConfig, out FinishClientRegistrationResult?)"/></param>
         /// <param name="clientIdentitiy">Current client identifier</param>
         /// <param name="serverIdentity">Current server identifier</param>
         /// <param name="result">A <see cref="StartServerLoginResult"/> filled with data if successful</param>
+        /// <param name="e">The infrastructure exception, if the native call fails</param>
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool StartLogin(string serverSetup, string startLoginRequest, string userIdentifier, 
             string? registrationRecord, string? clientIdentitiy, string? serverIdentity, out StartServerLoginResult? result, out Exception? e)
@@ -96,8 +98,8 @@ namespace OPAQUE.Net
         /// <summary>
         /// Finishes the login process for the server
         /// </summary>
-        /// <param name="serverLoginState"><see cref="StartServerLoginResult.ServerLoginState"/> from <see cref="OpaqueServer.StartLogin(string, string, string, string?, string?, string?, out StartServerLoginResult?)"/></param>
-        /// <param name="finishLoginRequest"><see cref="FinishClientLoginResult.FinishLoginRequest"/> from <see cref="OpaqueClient.FinishLogin(string, string, string, string?, string?, out FinishClientLoginResult?)"/></param>
+        /// <param name="serverLoginState"><see cref="StartServerLoginResult.ServerLoginState"/> from <see cref="OpaqueServer.StartLogin(string, string, string, string?, string?, string?, out StartServerLoginResult?, out Exception?)"/></param>
+        /// <param name="finishLoginRequest"><see cref="FinishClientLoginResult.FinishLoginRequest"/> from <see cref="OpaqueClient.FinishLogin(string, string, string, string?, string?, OPAQUE.Net.Types.Parameters.KSFConfig, out FinishClientLoginResult?)"/></param>
         /// <param name="serverSessionKey">The generated session key</param>
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
         public bool FinishLogin(string serverLoginState, string finishLoginRequest, out string? serverSessionKey)
@@ -109,20 +111,20 @@ namespace OPAQUE.Net
             return !string.IsNullOrEmpty(serverSessionKey);
         }
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern StringHandle create_server_setup();
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern StringHandle get_server_public_key(string secret);
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern StringHandle create_server_registration_response(string serverSetup, string userIdentifier, string registrationRequest);
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern StartServerLoginResultHandle start_server_login(string serverSetup, string startLoginRequest, 
             string userIdentifier, string? registrationRecord, string? clientIdentitiy, string? serverIdentity);
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern StringHandle finish_server_login(string serverLoginState, string finishLoginRequest);
     }
 }

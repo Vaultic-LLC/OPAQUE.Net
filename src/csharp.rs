@@ -3,17 +3,18 @@ use std::ffi::CStr;
 use std::ffi::CString;
 
 pub fn rust_string_to_csharp_string_handle(s: String) -> *mut c_char {
-    let c_str = CString::new(s).unwrap();
-    c_str.into_raw()
+    CString::new(s)
+        .map(CString::into_raw)
+        .unwrap_or(std::ptr::null_mut())
 }
 
 pub fn csharp_string_to_rust_string(s: *const c_char) -> String {
-    let c_str: &CStr = unsafe {
-        assert!(!s.is_null());
-        CStr::from_ptr(s)
-    };
+    if s.is_null() {
+        return String::new();
+    }
 
-    return c_str.to_str().unwrap().to_owned();
+    let c_str = unsafe { CStr::from_ptr(s) };
+    c_str.to_str().unwrap_or_default().to_owned()
 }
 
 #[no_mangle]

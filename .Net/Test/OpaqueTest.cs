@@ -196,7 +196,6 @@ namespace Test
             string userIdentifier = "user123";
             string password = "hunter42";
 
-            // use default config (Recommended)
             SetupAndRegister(userIdentifier, password, null, null, null, out string serverSetup, out string registrationRecord,
                 out string exportKey, out string serverStaticPublicKey);
 
@@ -326,6 +325,19 @@ namespace Test
             Assert.ThrowsException<StringParamIsEmptyException>(() => client.FinishLogin("", "Value", "Value", null, null, null, out _));
             Assert.ThrowsException<StringParamIsEmptyException>(() => client.FinishLogin("Value", "", "Value", null, null, null, out _));
             Assert.ThrowsException<StringParamIsEmptyException>(() => client.FinishLogin("Value", "Value", "", null, null, null, out _));
+        }
+
+        [TestMethod]
+        public void CustomKsfRejectsUnsafeParametersBeforeNativeInvocation()
+        {
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+                KSFConfig.Create(KSFConfigType.Custom, -1, 65536, 4));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+                KSFConfig.Create(KSFConfigType.Custom, 1, 65535, 4));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+                KSFConfig.Create(KSFConfigType.Custom, 1, 1048577, 4));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+                KSFConfig.Create(KSFConfigType.Custom, 1, 65536, 17));
         }
 
         [TestMethod]

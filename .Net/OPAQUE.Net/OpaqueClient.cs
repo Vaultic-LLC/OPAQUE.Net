@@ -82,7 +82,7 @@ namespace OPAQUE.Net
         /// Finishes the login process for the client
         /// </summary>
         /// <param name="clientLoginState"><see cref="StartClientLoginResult.ClientLoginState"/> from <see cref="OpaqueClient.StartLogin(string, out StartClientLoginResult?)"/></param>
-        /// <param name="serverLoginResponse"><see cref="StartServerLoginResult.LoginResponse"/> from <see cref="OpaqueServer.StartLogin(string, string, string, string?, string?, string?, out StartServerLoginResult?)"/></param>
+        /// <param name="serverLoginResponse"><see cref="StartServerLoginResult.LoginResponse"/> from <see cref="OpaqueServer.StartLogin(string, string, string, string?, string?, string?, out StartServerLoginResult?, out Exception?)"/></param>
         /// <param name="password">Users's current password</param>
         /// <param name="result">A <see cref="FinishClientLoginResult"/> filled with data if successful</param>
         /// <returns>True if succeeded, false otherwise. Out parameter will not be null if succeeded</returns>
@@ -95,7 +95,7 @@ namespace OPAQUE.Net
         /// Finishes the login process for the client
         /// </summary>
         /// <param name="clientLoginState"><see cref="StartClientLoginResult.ClientLoginState"/> from <see cref="OpaqueClient.StartLogin(string, out StartClientLoginResult?)"/></param>
-        /// <param name="serverLoginResponse"><see cref="StartServerLoginResult.LoginResponse"/> from <see cref="OpaqueServer.StartLogin(string, string, string, string?, string?, string?, out StartServerLoginResult?)"/></param>
+        /// <param name="serverLoginResponse"><see cref="StartServerLoginResult.LoginResponse"/> from <see cref="OpaqueServer.StartLogin(string, string, string, string?, string?, string?, out StartServerLoginResult?, out Exception?)"/></param>
         /// <param name="password">Users's current password</param>
         /// <param name="clientIdentifier">Current client identifier</param>
         /// <param name="serverIdentifier">Current server identifier</param>
@@ -117,17 +117,17 @@ namespace OPAQUE.Net
             return result != null;
         }
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern StartClientRegistrationResultHandle? start_client_registration(string password);
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern FinishClientRegistrationResultHandle finish_client_registration(string password, string registrationResponse, 
             string clientRegistrationState, string? clientIdentifier, string? serverIdentifier, string configType, string iterations, string memory, string parallelism);
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern StartClientLoginResultHandle start_client_login(string password);
 
-        [DllImport("opaque")]
+        [DllImport("opaque", CallingConvention = CallingConvention.Cdecl)]
         private static extern FinishClientLoginResultHandler? finish_client_login(string clientLoginState, string serverLoginResponse, string password, 
             string? clientIdentifier, string? serverIdentifier, string configType, string iterations, string memory, string parallelism);
     }
