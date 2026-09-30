@@ -654,3 +654,77 @@ pub extern "C" fn start_client_registration(
         registration_request: "".to_string(),
     }))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::ffi::CString;
+
+    fn custom_ksf(
+        iterations: u32,
+        memory: u32,
+        parallelism: u32,
+    ) -> types::KeyStretchingFunctionConfig {
+        types::KeyStretchingFunctionConfig::Custom {
+            iterations,
+            memory,
+            parallelism,
+        }
+    }
+
+    #[test]
+    fn rejects_malformed_base64() {
+        assert!(base64_decode("test", "%%%not-base64%%%").is_err());
+    }
+
+    #[test]
+    fn enforces_encoded_message_size_limit() {
+        let allowed = "A".repeat(MAX_ENCODED_PROTOCOL_MESSAGE_LEN);
+        let oversized = "A".repeat(MAX_ENCODED_PROTOCOL_MESSAGE_LEN + 1);
+
+        assert!(base64_decode("test", allowed).is_ok());
+        assert!(base64_decode("test", oversized).is_err());
+    }
+
+    #[test]
+    fn rejects_unsafe_custom_ksf_parameters() {
+        assert!(get_custom_ksf(custom_ksf(0, MIN_CUSTOM_MEMORY_KIB, 1)).is_err());
+        assert!(get_custom_ksf(custom_ksf(1, MIN_CUSTOM_MEMORY_KIB - 1, 1)).is_err());
+        assert!(get_custom_ksf(custom_ksf(1, MAX_CUSTOM_MEMORY_KIB + 1, 1)).is_err());
+        assert!(get_custom_ksf(custom_ksf(1, MIN_CUSTOM_MEMORY_KIB, 0)).is_err());
+        assert!(get_custom_ksf(custom_ksf(
+            1,
+            MIN_CUSTOM_MEMORY_KIB,
+            MAX_CUSTOM_PARALLELISM + 1
+        ))
+        .is_err());
+    }
+
+    #[test]
+    fn accepts_bounded_custom_ksf_parameters() {
+        assert!(get_custom_ksf(custom_ksf(1, MIN_CUSTOM_MEMORY_KIB, 1)).is_ok());
+        assert!(get_custom_ksf(custom_ksf(
+            MAX_CUSTOM_ITERATIONS,
+            MAX_CUSTOM_MEMORY_KIB,
+            MAX_CUSTOM_PARALLELISM,
+        ))
+        .is_ok());
+    }
+
+    #[test]
+    fn rejects_non_numeric_ffi_ksf_parameters() {
+        let kind = CString::new("custom").expect("static test input is valid");
+        let iterations = CString::new("not-a-number").expect("static test input is valid");
+        let memory =
+            CString::new(MIN_CUSTOM_MEMORY_KIB.to_string()).expect("numeric input is valid");
+        let parallelism = CString::new("1").expect("static test input is valid");
+
+        assert!(try_create_ksf_config(
+            kind.as_ptr() as *mut c_char,
+            iterations.as_ptr() as *mut c_char,
+            memory.as_ptr() as *mut c_char,
+            parallelism.as_ptr() as *mut c_char,
+        )
+        .is_err());
+    }
+}

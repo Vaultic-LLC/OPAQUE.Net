@@ -109,6 +109,9 @@ jobs:
           rustc --version --verbose
           cargo --version
 
+      - name: Test Rust crate
+        run: cargo test --locked
+
       - name: Cache cargo registry and build directory
         uses: actions/cache@v4
         with:
